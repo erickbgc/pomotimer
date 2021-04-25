@@ -1,45 +1,98 @@
-import React from 'react';
-import { Text, View, StyleSheet, Button, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar } from 'react-native';
 
-const pomoTimer = () => {
+import StartButton from './StartButton';
+import ResetButton from './ResetButton';
+import TimeButton from './TimeButton';
+
+const useContador = () => {
+    const [contador, setContador] = useState(0);
+
+    const incrementar = () => {
+        setContador(contador + 1);
+    }
+
+    const reset = () => {
+        setContador(0);
+    }
+
+    return { contador, incrementar, reset };
+}
+
+const Timer = (props) => {
     return (
-        <View style={styles.container}>
-            <Button title="Start" onPress={() => Alert.alert('Simple Button pressed')} />
-        </View>
+        <Text style={{ textAlign: 'center', fontSize: 32, fontWeight: 'bold', color: '#fff' }}
+        >Number: {props.count}</Text>
+    );
+}
+
+const pomoTimer = (props) => {
+
+    const {contador, incrementar, reset} = useContador();
+
+    const number = 5;
+
+    return (
+        <SafeAreaView style={styles.mainContainer}>
+            <View style={timerStyles.timerBox}>
+                <Timer count={contador} />
+            </View>
+            <View>
+                <Text style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', color: '#fff' }}>
+                    {'Terminar diseño pomodoro'}
+                </Text>
+            </View>
+            <View style={styles.pomoCont}>
+                <View style={styles.buttonsCont}>
+                    <TimeButton />
+                    <StartButton action={incrementar} />
+                    <ResetButton action={reset} />
+                </View>
+            </View>
+            <View>
+                <Text>
+                    {contador}
+                </Text>
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    mainContainer: {
         flex: 1,
+        marginTop: StatusBar.currentHeight || 0,
+        backgroundColor: '#e74c3c',
         justifyContent: 'center',
-        alignContent: 'center',
-        backgroundColor: '#D7283D',
-        textAlign: 'center'
+        alignItems: 'center',
     },
-    pomoContainer: {
-        flex: 1, 
-        alignContent: 'center',
-        fontSize: 32,
-        textAlign: 'center'
-    },
-    mainHeading: {
-        color: 'white',
-        fontSize: 32
-    },
-    boton: {
-        width: 300,
-        height: 30,
-        backgroundColor: 'white',
+    pomoCont: {
+        backgroundColor: '#e74c3c',
         justifyContent: 'center',
-        marginTop: 10,
-        marginBottom: 10,
-        borderRadius: 2,
-        borderWidth: 1
+        alignItems: 'center',
+        fontFamily: 'sans-serif',
+        padding: 10,
     },
-    txtBtn: {
-        color: 'black'
+    buttonsCont: {
+        flexDirection: 'row',
+        width: '100%',
+    },
+    mrl_5: {
+        marginLeft: 5,
+        marginRight: 5
     }
 });
+
+const timerStyles = StyleSheet.create({
+    timerBox: {
+        backgroundColor: "rgba(112, 112, 112, 0.5)",
+        borderColor: "rgba(112, 112, 112, 0.5)",
+        borderRadius: 8,
+        padding: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 250,
+    },
+})
 
 export default pomoTimer;
