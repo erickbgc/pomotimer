@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar } from 'react-native';
+import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar, Alert } from 'react-native';
 
 import StartButton from './StartButton';
 import ResetButton from './ResetButton';
@@ -28,9 +28,77 @@ const Timer = (props) => {
 
 const pomoTimer = (props) => {
 
-    const {contador, incrementar, reset} = useContador();
+    const [pomo, setPomo] = useState({
+        isRunning: false,
+        isStopped: true,
+        inicialMinutes: 5,
+        inicialSeconds: "00",
+        endTime: 0
+    });
 
-    const number = 5;
+    const empezarTempo = (e) => {
+        if (pomo.isStopped) {
+
+            var intervalId = setInterval(() => {
+                // if (pomo.inicialMinutes && pomo.inicialSeconds != 0) {
+                //     console.log('Primer if');
+                //     clearInterval(intervalId);
+                // } 
+
+                if (pomo.inicialSeconds == 0) {
+                    setPomo({ ...pomo, inicialSeconds: 60 });
+                    console.log("Segundo if");
+                    console.log("Antes Min: " +pomo.inicialMinutes)
+                    console.log("Antes Sec: " +pomo.inicialSeconds)
+                    setPomo((prevPomo) => ({
+                        ...pomo,
+                        inicialMinutes: pomo.inicialMinutes - 1,
+                        inicialSeconds: prevPomo.inicialSeconds - 1
+                    }));
+                    console.log("Despues Min: " +pomo.inicialMinutes)
+                    console.log("Despues Sec: " +pomo.inicialSeconds)
+                } else if (pomo.inicialSeconds < 60) {
+                    console.log("Tercer if");
+                    console.log("Antes Min: " +pomo.inicialMinutes)
+                    console.log("Antes Sec: " +pomo.inicialSeconds)
+                    setPomo((prevPomo) => ({
+                        ...pomo,
+                        inicialSeconds: prevPomo.inicialSeconds - 1
+                    }));
+                    console.log("Despues Min: " +pomo.inicialMinutes)
+                    console.log("Depues Sec: " +pomo.inicialSeconds)
+                }
+                
+                // if (pomo.inicialSeconds <= 9) {
+                //     console.log("Tercer if");
+                //     setPomo((prevPomo) => ({
+                //         ...pomo,
+                //         inicialSeconds: prevPomo.inicialSeconds - 1
+                //     }))
+                // }
+
+                // setPomo({isRunning: true, isStopped: false});
+                // if(pomo.isRunning) {
+                //     if(pomo.inicialSeconds <= 0 && pomo.inicialMinutes > 0) {
+                //         setPomo({inicialSeconds: 59}); //00:00:59
+                //         setPomo((prevPomo) => ({
+                //             inicialMinutes: prevPomo.inicialMinutes - 1,
+                //             inicialSeconds: prevPomo.inicialSeconds - 1
+                //         }))
+                //     } if(pomo.inicialSeconds <= 60 && pomo.inicialMinutes == 0) {
+                //         setPomo((prevPomo) => ({
+                //             inicialSeconds: prevPomo.inicialSeconds - 1
+                //         }))
+                //     } if(pomo.inicialSeconds == 0 && pomo.inicialMinutes == 0) {
+                //         setPomo({isStopped: true, isRunning: false});
+                //         clearInterval();
+                //     }
+                // }   
+            }, 1000)
+        }
+    }
+
+    const { contador, incrementar, reset } = useContador();
 
     return (
         <SafeAreaView style={styles.mainContainer}>
@@ -45,13 +113,18 @@ const pomoTimer = (props) => {
             <View style={styles.pomoCont}>
                 <View style={styles.buttonsCont}>
                     <TimeButton />
-                    <StartButton action={incrementar} />
+                    <StartButton action={empezarTempo} />
                     <ResetButton action={reset} />
                 </View>
             </View>
             <View>
-                <Text>
-                    {contador}
+                <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
+                    {
+                        pomo.inicialSeconds == 60 ? pomo.inicialMinutes + " : " + "00" : pomo.inicialMinutes + " : " + pomo.inicialSeconds
+                    }
+                </Text>
+                <Text style={{ color: "#000", fontSize: 24, fontWeight: "bold" }}>
+                    {pomo.inicialMinutes}
                 </Text>
             </View>
         </SafeAreaView>
