@@ -21,45 +21,93 @@ const useContador = () => {
 }
 
 const Timer = (props) => {
+
+    const {time, mode} = props;
+
+    const minutes = Math.floor(time / 1000 / 60);
+    const seconds = Math.floor((time / 1000) % 60);
+
     return (
-        <Text style={{ textAlign: 'center', fontSize: 32, fontWeight: 'bold', color: '#fff' }}
-        >{props.count}</Text>
+        <>
+            <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', fontFamily: 'sans-serif' }}>
+                {mode.toString().toUpperCase()}
+            </Text>
+            <Text style={{ textAlign: 'center', fontSize: 32, fontWeight: 'bold', color: '#fff' }}>
+                {minutes} : {seconds.toString().length === 1 ? "0" + seconds : seconds}
+            </Text>
+        </>
     );
 }
 
 const pomoTimer = (props) => {
 
-    const estadoInicial = {
-        isRunning: false,
-        isStopped: true,
-        inicialMinutes: 5,
-        inicialSeconds: "00",
-        endTime: 0
-    }
+    const [descansoTemp, setDescansoTemp] = useState(5 * 60);
+    const [pomoTemp, setPomoTemp] = useState(25 * 60);
+    const [mode, setMode] = useState('pomodoro');
+    const [tiempoResta, setTiempoResta] = useState();
+    const [isRunning, setRunning] = useState(false);
+    const [tiempoAct, setTiempoAct] = useState(0);
 
     useEffect(() => {
-        if(pomo.isStopped) {
-            let tempoID = setInterval(() => {
+        // Mostrara el tiempo restante segun el modo en el que nos encontremos
+        setTiempoResta(mode === 'pomodoro' ? pomoTemp * 1000 : descansoTemp * 1000);
+    }, [pomoTemp, descansoTemp]);
 
-                setPomo({...pomo, inicialSeconds: 60, isStopped: false})
+    useEffect(() => {
+        let tempoID = null;
 
-                clearInterval(tempoID);
+        if(isRunning && tiempoResta > 1) {
+            setTiempoResta(
+                mode === 'pomodoro' ? pomoTemp * 1000 - tiempoAct : descansoTemp * 1000 - tiempoAct
+            );
 
-            }, 1000)
+            // Se suma el segundo de ejecucion de la funcion setInterval
+            tempoID = setInterval(() => {
+                setTiempoAct((tiempoAct) => tiempoAct + 1000)
+            }, 1000);
+
+        } else {
+            clearInterval(tempoID);
         }
-        console.log(pomo)
-    }, [pomo])
 
-    const [pomo, setPomo] = useState(estadoInicial);
+        // Trivial case
+        if(tiempoResta === 0) {
+            setTiempoAct(0);
+            Alert.alert("Se acabo el tiempo!");
 
-    const empezarTempo = () => {console.log(pomo)}
+            setMode((mode) => (
+                mode == 'pomodoro' ? "descaso" : "pomodoro"
+            ));
+
+            setTiempoResta(
+                mode === "pomodoro" ? pomoTemp * 1000 : descansoTemp * 1000
+            );
+        }
+
+        return () => clearInterval(tempoID);
+    }, [isRunning, tiempoAct]);
+
+    const resetPomo = () => {
+        setDescansoTemp(5 * 60);
+        setPomoTemp(25 * 60);
+        setTiempoResta(mode == "pomodoro" ? pomoTemp * 1000 : descansoTemp * 1000);
+
+        if (isRunning) {
+            setRunning(false);
+            setTiempoAct(0);
+        }
+    }
+
+    const toggleisRunning = () => {
+        setRunning(!isRunning);
+    }
 
     const { contador, incrementar, reset } = useContador();
 
     return (
         <SafeAreaView style={styles.mainContainer}>
             <View style={timerStyles.timerBox}>
-                <Timer count={'25 : 00'} />
+                <Timer time={tiempoResta} mode={mode} />
             </View>
             <View style={{marginTop: 10, marginBottom: 40}}>
                 <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
@@ -69,8 +117,8 @@ const pomoTimer = (props) => {
             <View style={styles.pomoCont}>
                 <View style={styles.buttonsCont}>
                     <TimeButton />
-                    <StartButton action={incrementar} />
-                    <ResetButton action={reset} />
+                    <StartButton action={toggleisRunning} tooltip={isRunning ? "Pause" : "Start"} />
+                    <ResetButton action={resetPomo} />
                 </View>
             </View>
             <View>

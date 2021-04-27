@@ -15,7 +15,7 @@ const startButton = (props) => {
             >
             <View style={[styles.startBtn, styles.mrl_5]}>
                 <Text style={styles.btnText}>
-                    Start
+                    {props.tooltip}
                 </Text>
             </View>
         </TouchableNativeFeedback>
