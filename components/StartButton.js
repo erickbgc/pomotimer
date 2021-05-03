@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, TouchableNativeFeedback, Alert, StyleSheet } from 'react-native';
+import { Text, View, TouchableNativeFeedback, Alert, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 
 // import useContador from './Pomodoro'; 
 
@@ -7,18 +7,39 @@ const startButton = (props) => {
 
     // const { contador, incrementar } = useContador();
 
-    return(
-        <TouchableNativeFeedback
-            onPress={props.action}
-            background={TouchableNativeFeedback.Ripple('#bdc3c7')}
-            style={styles.mrl_5}
-            >
-            <View style={[styles.startBtn, styles.mrl_5]}>
-                <Text style={styles.btnText}>
-                    {props.tooltip}
-                </Text>
-            </View>
-        </TouchableNativeFeedback>
+    return (
+        <>
+            {
+                Platform.OS === 'android' && <>
+                    <TouchableNativeFeedback
+                        onPress={props.action}
+                        background={TouchableNativeFeedback.Ripple('#bdc3c7')}
+                        style={styles.mrl_5}
+                    >
+                        <View style={[styles.startBtn, styles.mrl_5]}>
+                            <Text style={styles.btnText}>
+                                {props.tooltip}
+                            </Text>
+                        </View>
+                    </TouchableNativeFeedback>
+                </>
+            }
+            {
+                Platform.OS === 'web' && <>
+                <TouchableOpacity
+                    onPress={props.action}
+                    background='#bdc3c7'
+                    style={styles.mrl_5}
+                >
+                    <View style={[styles.startBtn, styles.mrl_5]}>
+                        <Text style={styles.btnText}>
+                            {props.tooltip}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </>
+            }
+        </>
     )
 }
 

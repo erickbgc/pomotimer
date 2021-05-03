@@ -1,48 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar, Alert } from 'react-native';
+import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar, Alert, TouchableOpacity } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 import StartButton from './StartButton';
 import ResetButton from './ResetButton';
 import TimeButton from './TimeButton';
+import Timer from './Timer';
 
-const useContador = () => {
-    const [contador, setContador] = useState(0);
+// Task Component
+import Tasks from './Tasks';
 
-    const incrementar = () => {
-        setContador(contador + 1);
-        console.log(contador)
-    }
+import tasks from '../samples/tasks.json';
 
-    const reset = () => {
-        setContador(0);
-    }
+const tasksFunction = () => {
+    const [tareas, setTareas] = useState(tasks);
 
-    return { contador, incrementar, reset };
-}
 
-const Timer = (props) => {
-
-    const {time, mode} = props;
-
-    const minutes = Math.floor(time / 1000 / 60);
-    const seconds = Math.floor((time / 1000) % 60);
-
-    return (
-        <>
-            <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', fontFamily: 'sans-serif' }}>
-                {mode.toString().toUpperCase()}
-            </Text>
-            <Text style={{ textAlign: 'center', fontSize: 32, fontWeight: 'bold', color: '#fff' }}>
-                {minutes} : {seconds.toString().length === 1 ? "0" + seconds : seconds}
-            </Text>
-        </>
-    );
+    return { tareas, setTareas }
 }
 
 const pomoTimer = (props) => {
 
+    // Tareas
+    const { tareas, setTareas } = tasksFunction();
+
     const [descansoTemp, setDescansoTemp] = useState(5 * 60);
-    const [pomoTemp, setPomoTemp] = useState(25 * 60);
+    const [pomoTemp, setPomoTemp] = useState(1 * 60);
     const [mode, setMode] = useState('pomodoro');
     const [tiempoResta, setTiempoResta] = useState();
     const [isRunning, setRunning] = useState(false);
@@ -56,7 +39,7 @@ const pomoTimer = (props) => {
     useEffect(() => {
         let tempoID = null;
 
-        if(isRunning && tiempoResta > 1) {
+        if (isRunning && tiempoResta > 1) {
             setTiempoResta(
                 mode === 'pomodoro' ? pomoTemp * 1000 - tiempoAct : descansoTemp * 1000 - tiempoAct
             );
@@ -71,7 +54,7 @@ const pomoTimer = (props) => {
         }
 
         // Trivial case
-        if(tiempoResta === 0) {
+        if (tiempoResta === 0) {
             setTiempoAct(0);
             Alert.alert("Se acabo el tiempo!");
 
@@ -92,7 +75,7 @@ const pomoTimer = (props) => {
         setPomoTemp(25 * 60);
         setTiempoResta(mode == "pomodoro" ? pomoTemp * 1000 : descansoTemp * 1000);
 
-        if (isRunning) {
+        if (isRunning || !isRunning) {
             setRunning(false);
             setTiempoAct(0);
         }
@@ -102,43 +85,67 @@ const pomoTimer = (props) => {
         setRunning(!isRunning);
     }
 
-    const { contador, incrementar, reset } = useContador();
-
     return (
-        <SafeAreaView style={styles.mainContainer}>
-            <View style={timerStyles.timerBox}>
-                <Timer time={tiempoResta} mode={mode} />
-            </View>
-            <View style={{marginTop: 10, marginBottom: 40}}>
-                <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
-                    {'Terminar diseño pomodoro'}
-                </Text>
-            </View>
-            <View style={styles.pomoCont}>
-                <View style={styles.buttonsCont}>
-                    <TimeButton />
-                    <StartButton action={toggleisRunning} tooltip={isRunning ? "Pause" : "Start"} />
-                    <ResetButton action={resetPomo} />
+        <>
+            <StatusBar barStyle={'light-content'} backgroundColor="#e74c3c"  />
+            <SafeAreaView style={
+                mode == 'pomodoro' ?
+                    styles.mainContainer :
+                    [styles.mainContainer, styles.shortBreakBack]}
+            >
+                {/* Pomodoro Modes */}
+                <View style={timerStyles.timerBox}>
+                    <Timer time={tiempoResta} mode={mode} />
                 </View>
-            </View>
-            <View>
-                <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>
-                    {/* {
-                        pomo.inicialSeconds == 60 ? pomo.inicialMinutes + " : " + "00" : pomo.inicialMinutes + " : " + pomo.inicialSeconds
-                    } */}
-                </Text>
-                <Text style={{ color: "#000", fontSize: 24, fontWeight: "bold" }}>
-                    {/* {pomo.inicialMinutes} */}
-                </Text>
-            </View>
-        </SafeAreaView>
+
+                {/* Actual Tasks */}
+                <View style={{ marginTop: 10, marginBottom: 40 }}>
+                    <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff' }}>
+                        {'Terminar diseño pomodoro'}
+                    </Text>
+                </View>
+
+                {/* Pomodoro Buttons */}
+                <View style={
+                    mode == 'pomodoro' ?
+                        styles.pomoCont :
+                        [styles.pomoCont, styles.shortBreakBack]}
+                >
+                    <View style={styles.buttonsCont}>
+                        <TimeButton />
+                        <StartButton action={toggleisRunning} tooltip={isRunning ? "Pause" : "Start"} />
+                        <ResetButton action={resetPomo} />
+                    </View>
+                </View>
+
+                {/* Tareas View */}
+                {/* <ScrollView>
+                <View>
+                    <Tasks tasks={tareas} />
+                    <Text>{tiempoResta}</Text>
+                </View>
+                <View>
+                    <Tasks tasks={tareas} />
+                    <Text>{tiempoResta}</Text>
+                </View>
+                <View>
+                    <Tasks tasks={tareas} />
+                    <Text>{tiempoResta}</Text>
+                </View>
+                <View>
+                    <Tasks tasks={tareas} />
+                    <Text>{tiempoResta}</Text>
+                </View>
+            </ScrollView> */}
+
+            </SafeAreaView>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
-        marginTop: StatusBar.currentHeight || 0,
         backgroundColor: '#e74c3c',
         justifyContent: 'center',
         alignItems: 'center',
@@ -149,6 +156,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         fontFamily: 'sans-serif',
         padding: 10,
+    },
+    shortBreakBack: {
+        backgroundColor: '#686de0',
     },
     buttonsCont: {
         flexDirection: 'row',
@@ -170,6 +180,19 @@ const timerStyles = StyleSheet.create({
         alignItems: 'center',
         width: 250,
     },
+});
+
+const nav = StyleSheet.create({
+    container: {
+        flex: 1,
+        marginTop: StatusBar.currentHeight || 0,
+        backgroundColor: '#fff'
+    },
+    text: {
+        color: '#161924',
+        fontSize: 20,
+        fontWeight: '500'
+    }
 })
 
 export default pomoTimer;
