@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, SafeAreaView, ScrollView, StatusBar, Alert, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-import StartButton from './StartButton';
-import ResetButton from './ResetButton';
-import TimeButton from './TimeButton';
-import Timer from './Timer';
+import StartButton from '../components/StartButton';
+import ResetButton from '../components/ResetButton';
+import TimeButton from '../components/TimeButton';
+import Timer from '../components/Timer';
 
 // Task Component
-import Tasks from './Tasks';
+import Tasks from '../components/Tasks';
 
 import tasks from '../samples/tasks.json';
 
@@ -87,7 +87,7 @@ const pomoTimer = (props) => {
 
     return (
         <>
-            <StatusBar barStyle={'light-content'} backgroundColor="#e74c3c"  />
+            <StatusBar barStyle={'light-content'} backgroundColor="#e74c3c" />
             <SafeAreaView style={
                 mode == 'pomodoro' ?
                     styles.mainContainer :
@@ -120,23 +120,11 @@ const pomoTimer = (props) => {
 
                 {/* Tareas View */}
                 {/* <ScrollView>
-                <View>
-                    <Tasks tasks={tareas} />
-                    <Text>{tiempoResta}</Text>
-                </View>
-                <View>
-                    <Tasks tasks={tareas} />
-                    <Text>{tiempoResta}</Text>
-                </View>
-                <View>
-                    <Tasks tasks={tareas} />
-                    <Text>{tiempoResta}</Text>
-                </View>
-                <View>
-                    <Tasks tasks={tareas} />
-                    <Text>{tiempoResta}</Text>
-                </View>
-            </ScrollView> */}
+                    <View>
+                        <Tasks tasks={tareas} />
+                        <Text>{tiempoResta}</Text>
+                    </View>
+                </ScrollView> */}
 
             </SafeAreaView>
         </>

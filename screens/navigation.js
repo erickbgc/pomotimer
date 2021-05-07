@@ -1,10 +1,16 @@
 import React from 'react';
-import {View, Text} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 
-import Pomodoro from '../components/Pomodoro';
+// Custom Drawer
+import Sidebar from '../components/customDrawer';
+
+// Screens
+import Pomodoro from './Pomodoro';
 import NavButton from './NavButton';
+
+// Icons
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen = ({navigation}) => (
     <Pomodoro navigation={navigation} />
@@ -19,15 +25,25 @@ const AppDrawerScreen = () => {
     return (
         <AppDrawer.Navigator 
             initialRouteName="Home" 
-            drawerType="slide"
+            drawerContent={props => <Sidebar {...props} />}
             >
             <AppDrawer.Screen
                 name="Home"
                 component={HomeScreen}
+                options={{
+                    drawerIcon: ({focused, color, size}) => (
+                        <FontAwesome5 name="home" style={{fontSize: size, color: color}} />
+                    ),
+                }}
             />
             <AppDrawer.Screen
-                name="Sample"
+                name="Tasks"
                 component={Tareas}
+                options={{
+                    drawerIcon: ({focused, color, size}) => (
+                        <FontAwesome5 name="tasks" style={{fontSize: size, color: color}} />
+                    ),
+                }}
             />
         </AppDrawer.Navigator>
     )

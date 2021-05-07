@@ -1,6 +1,6 @@
 import React from 'react';
 import Navigation from './screens/navigation';
-import Pomodoro from './components/Pomodoro';
+import Pomodoro from './screens/Pomodoro';
 
 const app = () => {
   return(

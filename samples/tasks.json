@@ -1,29 +1,8 @@
 [
     {
         "id": 0,
-        "title": "Tarea 01",
+        "title": "Agrega tu tarea",
         "description": "Description 01",
-        "pomodoros": 3,
-        "done": true
-    },
-    {
-        "id": 2,
-        "title": "Tarea 02",
-        "description": "Description 02",
-        "pomodoros": 3,
-        "done": false
-    },
-    {
-        "id": 3,
-        "title": "Tarea 03",
-        "description": "Description 03",
-        "pomodoros": 3,
-        "done": true
-    },
-    {
-        "id": 4,
-        "title": "Tarea 04",
-        "description": "Description 04",
         "pomodoros": 3,
         "done": true
     }
