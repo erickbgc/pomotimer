@@ -12,27 +12,30 @@ import NavButton from './NavButton';
 // Icons
 import { FontAwesome5 } from '@expo/vector-icons';
 
-const HomeScreen = ({navigation}) => (
+const HomeScreen = ({ navigation }) => (
     <Pomodoro navigation={navigation} />
 );
 
-const Tareas =  ({navigation}) => (
+const Tareas = ({ navigation }) => (
     <NavButton name="Sample" navigation={navigation} />
 )
 
 const AppDrawer = createDrawerNavigator();
 const AppDrawerScreen = () => {
     return (
-        <AppDrawer.Navigator 
-            initialRouteName="Home" 
+        <AppDrawer.Navigator
+            initialRouteName="Home"
             drawerContent={props => <Sidebar {...props} />}
-            >
+            sceneContainerStyle={{
+                backgroundColor: '#000',
+            }}
+        >
             <AppDrawer.Screen
                 name="Home"
                 component={HomeScreen}
                 options={{
-                    drawerIcon: ({focused, color, size}) => (
-                        <FontAwesome5 name="home" style={{fontSize: size, color: color}} />
+                    drawerIcon: ({ focused, color, size }) => (
+                        <FontAwesome5 name="home" style={{ fontSize: size, color: color }} />
                     ),
                 }}
             />
@@ -40,8 +43,8 @@ const AppDrawerScreen = () => {
                 name="Tasks"
                 component={Tareas}
                 options={{
-                    drawerIcon: ({focused, color, size}) => (
-                        <FontAwesome5 name="tasks" style={{fontSize: size, color: color}} />
+                    drawerIcon: ({ focused, color, size }) => (
+                        <FontAwesome5 name="tasks" style={{ fontSize: size, color: color }} />
                     ),
                 }}
             />

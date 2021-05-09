@@ -7,17 +7,17 @@ const NavButton = (props) => {
         <>
             <View style={styles.container}>
                 <SafeAreaView style={styles.container.flex}>
-                    <TouchableOpacity 
-                        style={{alignItems: 'flex-end', margin: 16}}
-                        onPress={ () => props.navigation.toggleDrawer() }
+                    <TouchableOpacity
+                        style={{ alignItems: 'flex-end', margin: 16 }}
+                        onPress={() => props.navigation.toggleDrawer()}
                     >
                         <FontAwesome5 name='bars' size={24} color='#fff' />
                     </TouchableOpacity>
 
                     <View
-                        style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}
+                        style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
                     >
-                        <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 18}}>
+                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
                             {props.name} Screen
                         </Text>
                     </View>

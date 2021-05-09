@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Animated from 'react-native-reanimated';
 
@@ -14,7 +14,7 @@ const Sidebar = ({ progress, ...props }) => {
 
     return (
         <>
-            <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center', borderStyle: 'solid', borderBottomColor: 'rgba(236, 240, 241,0.6)', borderBottomWidth: 2, margin: 10, borderRadius: 2 }}>
+            <View style={styles.appBox}>
                 <Animated.View style={{ transform: [{ translateX }] }}>
                     <Text style={{ textAlign: 'left', fontSize: 21, fontWeight: '500' }}>
                         PomoTimer Menu
@@ -26,7 +26,7 @@ const Sidebar = ({ progress, ...props }) => {
                     <DrawerItemList {...props} />
                 </Animated.View>
             </DrawerContentScrollView>
-            <View style={{ alignItems: 'flex-end', justifyContent: 'flex-end', paddingRight: 15, paddingBottom: 10 }}>
+            <View style={styles.closeDrawerBtn}>
                 <Animated.View style={{ transform: [{ translateX }] }}>
                     <TouchableOpacity
                         onPress={() => props.navigation.closeDrawer()}
@@ -39,6 +39,23 @@ const Sidebar = ({ progress, ...props }) => {
     );
 };
 
-// const styles =
+const styles = StyleSheet.create({
+    appBox: {
+        flex: 0.2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderStyle: 'solid',
+        borderBottomColor: 'rgba(236, 240, 241,0.6)',
+        borderBottomWidth: 2,
+        margin: 10,
+        borderRadius: 2
+    },
+    closeDrawerBtn: {
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        paddingRight: 15,
+        paddingBottom: 10
+    }
+})
 
 export default Sidebar;
