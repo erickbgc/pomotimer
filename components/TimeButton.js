@@ -3,8 +3,8 @@ import { View, TouchableNativeFeedback, Alert, Platform, TouchableOpacity } from
 import { Icon } from 'react-native-elements';
 
 
-const handleView = () => {
-    if (Platform.OS === 'android') {
+const handleViewPlatform = () => {
+    if (Platform.OS === 'android' || Platform.OS === 'ios') {
         return (
             <View>
                 <Icon
@@ -36,7 +36,7 @@ const handleView = () => {
 }
 
 const timeButton = () => (
-    handleView()
+    handleViewPlatform()
 )
 
 export default timeButton;

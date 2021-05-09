@@ -1,47 +1,41 @@
-import React, { useState } from 'react';
-import { Text, View, TouchableNativeFeedback, Alert, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import React from 'react';
+import { Text, View, TouchableNativeFeedback, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 
-// import useContador from './Pomodoro'; 
+const handleViewPlatform = (props) => {
+    if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        return (
+            <TouchableNativeFeedback
+                onPress={props.action}
+                background={TouchableNativeFeedback.Ripple('#bdc3c7')}
+                style={styles.mrl_5}
+            >
+                <View style={[styles.startBtn, styles.mrl_5]}>
+                    <Text style={styles.btnText}>
+                        {props.tooltip}
+                    </Text>
+                </View>
+            </TouchableNativeFeedback>
+        )
+    } else if (Platform.OS === 'web') {
+        return (
+            <TouchableOpacity
+                onPress={props.action}
+                background='#bdc3c7'
+                style={styles.mrl_5}
+            >
+                <View style={[styles.startBtn, styles.mrl_5]}>
+                    <Text style={styles.btnText}>
+                        {props.tooltip}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+};
 
-const startButton = (props) => {
-
-    // const { contador, incrementar } = useContador();
-
-    return (
-        <>
-            {
-                Platform.OS === 'android' && <>
-                    <TouchableNativeFeedback
-                        onPress={props.action}
-                        background={TouchableNativeFeedback.Ripple('#bdc3c7')}
-                        style={styles.mrl_5}
-                    >
-                        <View style={[styles.startBtn, styles.mrl_5]}>
-                            <Text style={styles.btnText}>
-                                {props.tooltip}
-                            </Text>
-                        </View>
-                    </TouchableNativeFeedback>
-                </>
-            }
-            {
-                Platform.OS === 'web' && <>
-                <TouchableOpacity
-                    onPress={props.action}
-                    background='#bdc3c7'
-                    style={styles.mrl_5}
-                >
-                    <View style={[styles.startBtn, styles.mrl_5]}>
-                        <Text style={styles.btnText}>
-                            {props.tooltip}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            </>
-            }
-        </>
-    )
-}
+const startButton = (props) => (
+    handleViewPlatform(props)
+)
 
 const styles = StyleSheet.create({
     startBtn: {
