@@ -1,8 +1,15 @@
 [
     {
         "id": 0,
-        "title": "Agrega tu tarea",
+        "title": "Terminar Diseno Pomodoro",
         "description": "Description 01",
+        "pomodoros": 5,
+        "done": true
+    },
+    {
+        "id": 1,
+        "title": "Agrega tu tarea",
+        "description": "Description 02",
         "pomodoros": 3,
         "done": true
     }

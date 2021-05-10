@@ -7,27 +7,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import StartButton from '../components/StartButton';
 import ResetButton from '../components/ResetButton';
 import TimeButton from '../components/TimeButton';
+import MenuButton from '../components/MenuButton';
 import Timer from '../components/Timer';
-
-// Task Component
-import Tasks from '../components/Tasks';
-
-import tasks from '../samples/tasks.json';
-
-const tasksFunction = () => {
-    const [tareas, setTareas] = useState(tasks);
-
-
-    return { tareas, setTareas }
-}
 
 const pomoTimer = (props) => {
 
-    // Tareas
-    const { tareas, setTareas } = tasksFunction();
-
     const [descansoTemp, setDescansoTemp] = useState(5 * 60);
-    const [pomoTemp, setPomoTemp] = useState(1 * 60);
+    const [pomoTemp, setPomoTemp] = useState(25 * 60);
     const [mode, setMode] = useState('pomodoro');
     const [tiempoResta, setTiempoResta] = useState();
     const [isRunning, setRunning] = useState(false);
@@ -65,7 +51,7 @@ const pomoTimer = (props) => {
             }
 
             setMode((mode) => (
-                mode == 'pomodoro' ? "descaso" : "pomodoro"
+                mode == 'pomodoro' ? "descanso corto" : "pomodoro"
             ));
 
             setTiempoResta(
@@ -91,27 +77,32 @@ const pomoTimer = (props) => {
         setRunning(!isRunning);
     }
 
+    const handleModeChange = () => {
+        setRunning(false);
+        setTiempoAct(0);
+        setDescansoTemp(5 * 60);
+
+        if (mode == 'pomodoro') {
+            setMode('descanso corto');
+            setPomoTemp(descansoTemp);
+            setTiempoResta(descansoTemp * 1000);
+        } else {
+            setMode('pomodoro');
+            setPomoTemp(25 * 60);
+            setTiempoResta(pomoTemp * 1000);
+        }
+    }
+
     return (
         <>
-            <StatusBar barStyle={'light-content'} backgroundColor={mode === 'pomodoro' ? "#e74c3c" : "#686de0"} />
+            <StatusBar barStyle={'light-content'} backgroundColor={mode == 'pomodoro' ? '#e74c3c' : mode == 'descanso corto' ? "#686de0" : false} />
             <View style={mode === 'pomodoro' ? [styles.container] : [styles.container, styles.shortBreakBack]}>
                 <SafeAreaProvider style={styles.container.flex}>
                     {/* Toolbar */}
-                    <View style={styles.toolbar}>
-                        <TouchableOpacity
-                            style={{ margin: 16 }}
-                            onPress={() => props.navigation.toggleDrawer()}>
-                            <FontAwesome5 name="bars" size={24} color="#fff" />
-                        </TouchableOpacity>
-                        <View style={styles.toolbarMode}>
-                            <Text style={styles.toolbarModeText}>
-                                {mode.toString().toUpperCase()}
-                            </Text>
-                        </View>
-                    </View>
+                    <MenuButton {...props} mode={mode} />
 
                     {/* Temporizador y Call to Action Buttons */}
-                    <View style={styles.content}>
+                    <View style={mode == 'pomodoro' ? styles.content : [styles.content, styles.shortBreakBack]}>
 
                         {/* temporizador y tarea actual */}
                         <View style={{ marginBottom: -150 }}>
@@ -128,7 +119,7 @@ const pomoTimer = (props) => {
                                 [styles.pomoCont, styles.shortBreakBack]
                         }>
                             <View style={styles.buttonsCont}>
-                                <TimeButton />
+                                <TimeButton action={handleModeChange} />
                                 <StartButton action={toggleisRunning} tooltip={isRunning ? "Pause" : "Start"} />
                                 <ResetButton action={resetPomo} />
                             </View>
@@ -144,20 +135,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#e74c3c'
-    },
-    toolbar: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-    },
-    toolbarMode: {
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    toolbarModeText: {
-        textAlign: 'center',
-        fontSize: 18,
-        color: 'white',
-        fontWeight: 'bold'
     },
     content: {
         flex: 1,
