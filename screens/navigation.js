@@ -25,16 +25,12 @@ const HomeScreen = ({ navigation }) => (
     <Pomodoro navigation={navigation} />
 );
 
-const Tareas = ({ navigation }) => (
-    <TasksScreen navigation={navigation} />
+const Tareas = ({ navigation, route }) => (
+    <TasksScreen navigation={navigation} route={route} />
 );
 
-const TareasDetalles = ({ navigation }) => (
-    <TaskDetails navigation={navigation} />
-)
-
-const forFade = () => (
-    <View style={{ flex: 1, backgroundColor: 'blue' }}></View>
+const TareasDetalles = ({ navigation, route }) => (
+    <TaskDetails navigation={navigation} route={route} />
 )
 
 const TasksStackScreen = () => (

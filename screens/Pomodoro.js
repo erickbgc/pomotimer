@@ -51,7 +51,7 @@ const pomoTimer = (props) => {
             }
 
             setMode((mode) => (
-                mode == 'pomodoro' ? "descanso corto" : "pomodoro"
+                mode === 'pomodoro' ? "descanso corto" : "pomodoro"
             ));
 
             setTiempoResta(
@@ -95,7 +95,7 @@ const pomoTimer = (props) => {
 
     return (
         <>
-            <StatusBar barStyle={'light-content'} backgroundColor={mode == 'pomodoro' ? '#e74c3c' : mode == 'descanso corto' ? "#686de0" : false} />
+            <StatusBar barStyle={'light-content'} backgroundColor={mode == 'pomodoro' ? '#e74c3c' : '#686de0'} />
             <View style={mode === 'pomodoro' ? [styles.container] : [styles.container, styles.shortBreakBack]}>
                 <SafeAreaProvider style={styles.container.flex}>
                     {/* Toolbar */}

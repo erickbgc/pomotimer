@@ -7,7 +7,7 @@ const MenuButton = (props) => {
 
     const navigation = useNavigation();
 
-    const { mode, addButton, backButton } = props;
+    const { mode, addButton, backButton, methods } = props;
 
     return (
         <View style={backButton ? [styles.toolbar, { justifyContent: 'flex-start' }] : styles.toolbar} {...props} >
@@ -35,7 +35,7 @@ const MenuButton = (props) => {
                 </Text>
             </View>
             {
-                addButton === true && <>
+                addButton !== undefined && <>
                     <TouchableOpacity
                         style={{ margin: 16 }}
                         onPress={() => navigation.push('Agregar Tarea')}
