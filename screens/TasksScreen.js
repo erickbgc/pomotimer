@@ -12,33 +12,30 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import MenuButtonTasks from '../components/MenuButtonTasks';
 import { ScrollView } from 'react-native-gesture-handler';
 
-import tasks from '../samples/tasks.json';
+import firebase from '../database/firebase';
 
 const NavButton = (props) => {
 
-    const [tareas, setTareas] = useState(tasks);
-
-    function addItem(title, description, pomodoros) {
-        const newItem = {
-            title,
-            description,
-            pomodoros,
-            id: tareas.length
-        }
-
-        setTareas({
-            tareas: [...tareas, newItem]
-        })
-    }
-
-    const addon = props.route.params?.addon;
+    const [tareas, setTareas] = useState([]);
 
     useEffect(() => {
-        if (addon) {
-            const state = props.route.params?.state;
-            console.log(state);
-        }
-    })
+        firebase.database.collection('tareas').onSnapshot(querySnapshot => {
+
+            const tasks = [];
+
+            querySnapshot.docs.forEach(doc => {
+                const { title, description, pomodoros } = doc.data();
+                tasks.push({
+                    id: doc.id,
+                    title,
+                    description,
+                    pomodoros
+                });
+            });
+
+            setTareas(tasks);
+        });
+    }, []);
 
     return (
         <>
@@ -50,42 +47,6 @@ const NavButton = (props) => {
                     <View style={cardTasks.mainLabel}>
                         <Text style={cardTasks.text}>Planeación</Text>
                     </View>
-
-                    {/* {
-                        addon === true && <>
-                            {
-                                tareas.map((task) => (
-                                    <TouchableOpacity
-                                        onPress={() => alert('Hello World')}
-                                        key={task.id}
-                                    >
-                                        <View style={{
-                                            borderRadius: 4,
-                                            backgroundColor: '#fff',
-                                            alignItems: 'center',
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between',
-                                            paddingHorizontal: 15,
-                                            marginTop: 15,
-                                            paddingVertical: 15,
-                                        }}
-                                        >
-                                            <View style={{ flexShrink: 1 }}>
-                                                <Text style={[cardTasks.text, { fontSize: 18, overflow: 'hidden' }]} numberOfLines={2}>
-                                                    {task.title}
-                                                </Text>
-                                            </View>
-                                            <View style={{ flexDirection: 'row' }}>
-                                                <FontAwesome5 name="stopwatch" size={16} color="#707070" />
-                                                <Text>&nbsp;</Text>
-                                                <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#707070' }}>{task.pomodoros}</Text>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))
-                            }
-                        </>
-                    } */}
 
                     {
                         tareas.map((task) => (

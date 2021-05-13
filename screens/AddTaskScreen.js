@@ -14,23 +14,22 @@ import { useNavigation } from '@react-navigation/native';
 
 import MenuButtonTasks from '../components/MenuButtonTasks';
 
+// Firebase Import
+import firebase from '../database/firebase';
+
 const TaskDetails = (props) => {
 
     // Tareas State
     const navigation = useNavigation();
 
-    // const initialState = {
-    //     title: '',
-    //     description: '',
-    //     pomodoros: '',
-    // }
-
-
-    const [state, setState] = useState({
-        title: "",
-        description: "",
+    const initialState = {
+        title: '',
+        description: '',
         pomodoros: 1,
-    });
+    }
+
+
+    const [state, setState] = useState(initialState);
 
     const handleTextChange = (name, value) => {
         if (name == 'pomodoros' && isNaN) {
@@ -41,12 +40,21 @@ const TaskDetails = (props) => {
         }
     }
 
-    const saveItem = () => {
-        if (state.title === '' || state.description === '' || (state.pomodoros < 0 || state.pomodoros == undefined)) {
+    const saveNewTask = async () => {
+        if (state.title === '' || state.description === '' || (state.pomodoros <= 0 || state.pomodoros == undefined)) {
             alert('Comprueba los datos ingresados');
         } else {
-            // console.log(state);
-            navigation.navigate('Lista de Tareas', { state, addon: true });
+            try {
+                // console.log(state);
+                await firebase.database.collection('tareas').add({
+                    title: state.title,
+                    description: state.description,
+                    pomodoros: state.pomodoros
+                })
+                navigation.navigate('Lista de Tareas', { state, addon: true });
+            } catch (e) {
+                console.log(e.message);
+            }
         }
     }
 
@@ -105,12 +113,7 @@ const TaskDetails = (props) => {
                         <View style={{ marginTop: 25 }}>
                             <Button
                                 title='Save Task'
-                                onPress={
-                                    () => {
-                                        async () => await new Promise(resolve => setTimeout(resolve, 500))
-                                        saveItem()
-                                    }
-                                }
+                                onPress={saveNewTask}
                             />
                         </View>
 
