@@ -105,6 +105,8 @@ const styles = StyleSheet.create({
 const cardTasks = StyleSheet.create({
     mainLabel: {
         flex: 0.08,
+        minHeight: 58,
+        maxHeight: 58,
         borderRadius: 4,
         backgroundColor: '#fff',
         alignItems: 'flex-start',

@@ -9,9 +9,12 @@ import {
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
+import NumericInput from 'react-native-numeric-input';
 
+// Navigation Hook
 import { useNavigation } from '@react-navigation/native';
 
+// Toolbar Component
 import MenuButtonTasks from '../components/MenuButtonTasks';
 
 // Firebase Import
@@ -49,7 +52,8 @@ const TaskDetails = (props) => {
                 await firebase.database.collection('tareas').add({
                     title: state.title,
                     description: state.description,
-                    pomodoros: state.pomodoros
+                    pomodoros: state.pomodoros,
+                    createdAt: new Date()
                 })
                 navigation.navigate('Lista de Tareas', { state, addon: true });
             } catch (e) {

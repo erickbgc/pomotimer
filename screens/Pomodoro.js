@@ -10,8 +10,16 @@ import TimeButton from '../components/TimeButton';
 import MenuButton from '../components/MenuButton';
 import Timer from '../components/Timer';
 
+import firebase from '../database/firebase';
+
 const pomoTimer = (props) => {
 
+    // Tareas
+    const [tareas, setTareas] = useState([]);
+    const [tareaActual, setTareaActual] = useState([]);
+    const [bloquesDetiempo, setBloquesDeTiempo] = useState(1);
+
+    // Estados del pomodoro
     const [descansoTemp, setDescansoTemp] = useState(5 * 60);
     const [pomoTemp, setPomoTemp] = useState(25 * 60);
     const [mode, setMode] = useState('pomodoro');
@@ -19,11 +27,60 @@ const pomoTimer = (props) => {
     const [isRunning, setRunning] = useState(false);
     const [tiempoAct, setTiempoAct] = useState(0);
 
+    // Llamada a la BD
+    useEffect(() => {
+        firebase.database.collection('tareas').onSnapshot(querySnapshot => {
+
+            const tasks = [];
+            const veryFirstTask = [];
+
+            querySnapshot.docs.forEach(doc => {
+                const { title, description, pomodoros, createdAt } = doc.data();
+                tasks.push({
+                    id: doc.id,
+                    title,
+                    description,
+                    pomodoros,
+                    createdAt
+                });
+            });
+
+            try {
+                if (tasks.length > 0) {
+                    setTareas(tasks);
+                    veryFirstTask.push(tasks[tasks.length - 1]);
+                    setTareaActual(veryFirstTask);
+                }
+            } catch (error) {
+                console.log(error.message);
+            }
+        });
+    }, []);
+
+    // Estableciendo el valor de las bloques pomodoro con respecto a la tarea actual
+    useEffect(() => {
+        const bloques = [];
+        if (tareaActual.length > 0) {
+            try {
+                tareaActual.forEach(val => {
+                    bloques.push(val.pomodoros);
+                })
+                setBloquesDeTiempo(bloques[0]);
+            } catch (e) {
+                console.log(e.message)
+            }
+        }
+    }, [tareaActual])
+
+    console.log("Bloques de Tiempo: ", bloquesDetiempo);
+
+    // Actualizacion de Tiempo Restante
     useEffect(() => {
         // Mostrara el tiempo restante segun el modo en el que nos encontremos
         setTiempoResta(mode === 'pomodoro' ? pomoTemp * 1000 : descansoTemp * 1000);
     }, [pomoTemp, descansoTemp]);
 
+    // Temporizador
     useEffect(() => {
         let tempoID = null;
 
@@ -107,9 +164,13 @@ const pomoTimer = (props) => {
                         {/* temporizador y tarea actual */}
                         <View style={{ marginBottom: -150 }}>
                             <Timer time={tiempoResta} mode={mode} />
-                            <Text style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', marginTop: 10, marginBottom: 40 }}>
-                                {'Terminar diseño pomodoro'}
-                            </Text>
+                            {
+                                tareaActual.map((value) => (
+                                    <Text key={value.id} style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', marginTop: 10, marginBottom: 40 }}>
+                                        {value.title}
+                                    </Text>
+                                ))
+                            }
                         </View>
 
                         {/* CTA Buttons */}
