@@ -9,6 +9,8 @@ npm-debug.*
 *.orig.*
 web-build/
 desktop.ini
+notes.txt
+samples/
 
 # macOS
 .DS_Store

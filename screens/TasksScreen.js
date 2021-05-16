@@ -51,33 +51,44 @@ const NavButton = (props) => {
 
                     {
                         tareas.map((task) => (
-                            <TouchableOpacity
-                                onPress={() => alert('Hello World')}
-                                key={task.id}
-                            >
-                                <View style={{
-                                    borderRadius: 4,
-                                    backgroundColor: '#fff',
-                                    alignItems: 'center',
-                                    flexDirection: 'row',
-                                    justifyContent: 'space-between',
-                                    paddingHorizontal: 15,
-                                    marginTop: 15,
-                                    paddingVertical: 15,
-                                }}
+                            task.done ?
+                                <TouchableOpacity
+                                    onPress={() => alert('Hello World')}
+                                    key={task.id}
                                 >
-                                    <View style={{ flexShrink: 1 }}>
-                                        <Text style={[cardTasks.text, { fontSize: 18, overflow: 'hidden' }]} numberOfLines={2}>
-                                            {task.title}
-                                        </Text>
+                                    <View style={cardTasks.taskDone}
+                                    >
+                                        <View style={{ flexShrink: 1 }}>
+                                            <Text style={[cardTasks.text, { fontSize: 18, overflow: 'hidden', color: '#fff' }]} numberOfLines={2}>
+                                                {task.title}
+                                            </Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <FontAwesome5 name="stopwatch" size={16} color="#fff" />
+                                            <Text>&nbsp;</Text>
+                                            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#fff' }}>{task.pomodoros}</Text>
+                                        </View>
                                     </View>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <FontAwesome5 name="stopwatch" size={16} color="#707070" />
-                                        <Text>&nbsp;</Text>
-                                        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#707070' }}>{task.pomodoros}</Text>
+                                </TouchableOpacity>
+                                :
+                                <TouchableOpacity
+                                    onPress={() => alert('Hello World')}
+                                    key={task.id}
+                                >
+                                    <View style={cardTasks.isNotDone}
+                                    >
+                                        <View style={{ flexShrink: 1 }}>
+                                            <Text style={[cardTasks.text, { fontSize: 18, overflow: 'hidden' }]} numberOfLines={2}>
+                                                {task.title}
+                                            </Text>
+                                        </View>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <FontAwesome5 name="stopwatch" size={16} color="#707070" />
+                                            <Text>&nbsp;</Text>
+                                            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#707070' }}>{task.pomodoros}</Text>
+                                        </View>
                                     </View>
-                                </View>
-                            </TouchableOpacity>
+                                </TouchableOpacity>
                         ))
                     }
 
@@ -120,6 +131,26 @@ const cardTasks = StyleSheet.create({
         textAlign: 'left',
         fontWeight: 'bold',
         color: '#707070'
+    },
+    taskDone: {
+        borderRadius: 4,
+        backgroundColor: 'rgba(46, 204, 113, 1.0)',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 15,
+        marginTop: 15,
+        paddingVertical: 15,
+    },
+    isNotDone: {
+        borderRadius: 4,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 15,
+        marginTop: 15,
+        paddingVertical: 15,
     }
 });
 

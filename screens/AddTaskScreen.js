@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
-import NumericInput from 'react-native-numeric-input';
 
 // Navigation Hook
 import { useNavigation } from '@react-navigation/native';
