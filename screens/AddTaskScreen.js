@@ -53,7 +53,8 @@ const TaskDetails = (props) => {
                     title: state.title,
                     description: state.description,
                     pomodoros: state.pomodoros,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    done: false
                 })
                 navigation.navigate('Lista de Tareas', { state, addon: true });
             } catch (e) {

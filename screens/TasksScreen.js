@@ -24,12 +24,13 @@ const NavButton = (props) => {
             const tasks = [];
 
             querySnapshot.docs.forEach(doc => {
-                const { title, description, pomodoros } = doc.data();
+                const { title, description, pomodoros, done } = doc.data();
                 tasks.push({
                     id: doc.id,
                     title,
                     description,
-                    pomodoros
+                    pomodoros,
+                    done
                 });
             });
 
