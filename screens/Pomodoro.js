@@ -18,10 +18,16 @@ const pomoTimer = (props) => {
     const [tareas, setTareas] = useState([]);
     const [tareaActual, setTareaActual] = useState([]);
     const [bloquesDetiempo, setBloquesDeTiempo] = useState(1);
+    var bloquesTemp = 1;
+    var rondas = 1;
+    var tareaActualId;
+
+    // Contador de Bloques
+    const [contadorDeBloque, setContadorDeBloques] = useState(0);
 
     // Estados del pomodoro
-    const [descansoTemp, setDescansoTemp] = useState(5 * 60);
-    const [pomoTemp, setPomoTemp] = useState(25 * 60);
+    const [descansoTemp, setDescansoTemp] = useState(1 * 60);
+    const [pomoTemp, setPomoTemp] = useState(1 * 60);
     const [mode, setMode] = useState('pomodoro');
     const [tiempoResta, setTiempoResta] = useState();
     const [isRunning, setRunning] = useState(false);
@@ -32,7 +38,6 @@ const pomoTimer = (props) => {
         firebase.database.collection('tareas').onSnapshot(querySnapshot => {
 
             const tasks = [];
-            const veryFirstTask = [];
 
             querySnapshot.docs.forEach(doc => {
                 const { title, description, pomodoros, createdAt } = doc.data();
@@ -48,8 +53,7 @@ const pomoTimer = (props) => {
             try {
                 if (tasks.length > 0) {
                     setTareas(tasks);
-                    veryFirstTask.push(tasks[tasks.length - 1]);
-                    setTareaActual(veryFirstTask);
+                    setTareaActual([tasks[tasks.length - 1]]);
                 }
             } catch (error) {
                 console.log(error.message);
@@ -64,15 +68,18 @@ const pomoTimer = (props) => {
             try {
                 tareaActual.forEach(val => {
                     bloques.push(val.pomodoros);
+                    tareaActualId = val.id;
                 })
                 setBloquesDeTiempo(bloques[0]);
+                bloquesTemp = bloquesDetiempo;
+                rondas = bloquesTemp * 2;
             } catch (e) {
-                console.log(e.message)
+                console.log(e)
             }
         }
     }, [tareaActual])
 
-    console.log("Bloques de Tiempo: ", bloquesDetiempo);
+    // console.log("Bloques de Tiempo: ", bloquesDetiempo);
 
     // Actualizacion de Tiempo Restante
     useEffect(() => {
@@ -83,6 +90,7 @@ const pomoTimer = (props) => {
     // Temporizador
     useEffect(() => {
         let tempoID = null;
+        console.log(`Outside the Pomodoro conditional\nThis is the number of rounds completed: ${contadorDeBloque}`);
 
         if (isRunning && tiempoResta > 1) {
             setTiempoResta(
@@ -99,7 +107,7 @@ const pomoTimer = (props) => {
         }
 
         // Trivial case
-        if (tiempoResta === 0) {
+        if (tiempoResta === 0 && contadorDeBloque < rondas) {
             setTiempoAct(0);
             if (Platform.OS === 'android') {
                 Alert.alert("Se acabo el tiempo!");
@@ -114,10 +122,21 @@ const pomoTimer = (props) => {
             setTiempoResta(
                 mode === "pomodoro" ? pomoTemp * 1000 : descansoTemp * 1000
             );
+
+            setContadorDeBloques(contadorDeBloque + 1);
+
+        } else if (tiempoResta === 0 && contadorDeBloque >= rondas) {
+            handleModeChange();
+            // checkDoneTask();
+            console.log("La tarea a terminado");
         }
 
         return () => clearInterval(tempoID);
     }, [isRunning, tiempoAct]);
+
+    // const checkDoneTask = async () => {
+    //     await firebase.database.doc(`tareas/${tareaActualId}`).set({ done: true }, { merge: true });
+    // }
 
     const resetPomo = () => {
         setDescansoTemp(5 * 60);
@@ -166,7 +185,7 @@ const pomoTimer = (props) => {
                             <Timer time={tiempoResta} mode={mode} />
                             {
                                 tareaActual.map((value) => (
-                                    <Text key={value.id} style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', marginTop: 10, marginBottom: 40 }}>
+                                    value.done != true && <Text key={value.id} style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', marginTop: 10, marginBottom: 40 }}>
                                         {value.title}
                                     </Text>
                                 ))
