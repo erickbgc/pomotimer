@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
     View,
     Text,
@@ -12,9 +12,16 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import MenuButtonTasks from '../components/MenuButtonTasks';
 import { ScrollView } from 'react-native-gesture-handler';
 
+// Theme context
+import ThemeContext from '../providers/ThemeContext';
+
 import firebase from '../database/firebase';
 
 const NavButton = (props) => {
+
+    const theme = useContext(ThemeContext);
+
+    console.log(theme);
 
     const [tareas, setTareas] = useState([]);
 
@@ -40,21 +47,20 @@ const NavButton = (props) => {
 
     return (
         <>
-            <StatusBar barStyle={'light-content'} backgroundColor="#e74c3c" />
+            <StatusBar barStyle={'light-content'} />
             <ScrollView contentContainerStyle={styles.container}>
-                <MenuButtonTasks {...props} mode={"Tareas"} addButton={true} />
+                <MenuButtonTasks {...props} mode={"Tareas"} addButton={true} color={theme.backgroundColor} />
 
-                <View style={styles.content}>
+                <View style={[styles.content, { backgroundColor: theme.backgroundColor }]}>
                     <View style={cardTasks.mainLabel}>
                         <Text style={cardTasks.text}>Planeación</Text>
                     </View>
-
                     {
                         tareas.map((task) => (
                             task.done ?
                                 <TouchableOpacity
-                                    onPress={() => alert('Hello World')}
                                     key={task.id}
+                                    onPress={() => props.navigation.push('Tarea', { task })}
                                 >
                                     <View style={cardTasks.taskDone}
                                     >
@@ -72,8 +78,8 @@ const NavButton = (props) => {
                                 </TouchableOpacity>
                                 :
                                 <TouchableOpacity
-                                    onPress={() => alert('Hello World')}
                                     key={task.id}
+                                    onPress={() => props.navigation.push('Tarea', { task })}
                                 >
                                     <View style={cardTasks.isNotDone}
                                     >
@@ -91,7 +97,6 @@ const NavButton = (props) => {
                                 </TouchableOpacity>
                         ))
                     }
-
                 </View>
             </ScrollView>
         </>
@@ -105,7 +110,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        backgroundColor: '#e74c3c',
         marginVertical: 15,
         marginHorizontal: 10,
     },
@@ -134,7 +138,7 @@ const cardTasks = StyleSheet.create({
     },
     taskDone: {
         borderRadius: 4,
-        backgroundColor: 'rgba(46, 204, 113, 1.0)',
+        backgroundColor: 'rgba(116, 185, 255,0.9)',
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',

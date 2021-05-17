@@ -9,12 +9,12 @@ import Sidebar from '../components/customDrawer';
 
 // Screens
 import Pomodoro from './Pomodoro';
-import TasksScreen from './TasksScreen';
-import AddTaskScreen from './AddTaskScreen';
+import ListaDeTareasScreen from './ListaDeTareasScreen';
+import AgregarTareaScreen from './AgregarTareaScreen';
+import DetallesDeTareaScreen from './DetallesDeTareaScreen';
 
 // Icons
 import { FontAwesome5 } from '@expo/vector-icons';
-import MenuButtonTasks from '../components/MenuButtonTasks';
 
 // Stack and Navigation Drawer Navigators
 const TasksStack = createStackNavigator();
@@ -26,16 +26,20 @@ const HomeScreen = ({ navigation }) => (
 );
 
 const Tasks = ({ navigation, route }) => (
-    <TasksScreen navigation={navigation} route={route} />
+    <ListaDeTareasScreen navigation={navigation} route={route} />
 );
 
 const AddTask = ({ navigation, route }) => (
-    <AddTaskScreen navigation={navigation} route={route} />
+    <AgregarTareaScreen navigation={navigation} route={route} />
+)
+
+const TaskDetails = ({ navigation, route }) => (
+    <DetallesDeTareaScreen navigation={navigation} route={route} />
 )
 
 const TasksStackScreen = () => (
     <TasksStack.Navigator>
-        <TasksStack.Screen name='Lista de Tareas' component={Tasks} initialRouteName="Lista de Tareas"
+        <TasksStack.Screen name='Lista de Tareas' component={Tasks}
             options={{
                 headerShown: false,
             }}
@@ -44,8 +48,12 @@ const TasksStackScreen = () => (
             name='Agregar Tarea'
             component={AddTask}
             options={{
-                headerShown: false,
+                headerShown: true,
             }}
+        />
+        <TasksStack.Screen
+            name='Tarea'
+            component={TaskDetails}
         />
     </TasksStack.Navigator>
 )

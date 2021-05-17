@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Navigation from './screens/navigation';
+import Context from './providers/ThemeContext';
 
-const app = () => {
+const App = () => {
+
   return (
-    <Navigation />
+    <Context.Provider value={{ value: 'yellow' }}>
+      <Navigation />
+    </Context.Provider>
   );
 }
 
-export default app;
+export default App;

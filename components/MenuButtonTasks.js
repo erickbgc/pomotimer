@@ -7,10 +7,10 @@ const MenuButton = (props) => {
 
     const navigation = useNavigation();
 
-    const { mode, addButton, backButton, methods } = props;
+    const { mode, addButton, backButton, color } = props;
 
     return (
-        <View style={backButton ? [styles.toolbar, { justifyContent: 'flex-start' }] : styles.toolbar} {...props} >
+        <View style={backButton ? [styles.toolbar, { justifyContent: 'flex-start' }] : [styles.toolbar]} {...props} >
             {
                 backButton === true && <>
                     <TouchableOpacity

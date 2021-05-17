@@ -4,10 +4,10 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const MenuButton = (props) => {
 
-    const { mode, addButton } = props;
+    const { mode, color } = props;
 
     return (
-        <View style={styles.toolbar}>
+        <View style={[styles.toolbar, { color: color }]}>
             <TouchableOpacity
                 style={{ margin: 16 }}
                 onPress={() => props.navigation.toggleDrawer()}>
