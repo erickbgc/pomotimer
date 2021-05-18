@@ -22,7 +22,7 @@ import Timer from '../components/Timer';
 
 import firebase from '../database/firebase';
 
-const pomoTimer = (props) => {
+const pomoTimer = (props, { navigation }) => {
 
     // Styles
     const [theme, setTheme] = useState({
@@ -43,44 +43,6 @@ const pomoTimer = (props) => {
 
     // Contador para los descansos largos
     const [contadorDescansosLargos, setContadorDescansosLargos] = useState(0);
-
-    const verificarModo = {
-        'pomodoro': () => {
-            setMode('descanso corto');
-            setPomoTemp(descansoTemp);
-            setTiempoResta(descansoTemp * 1000);
-            setContadorDescansosLargos(contadorDescansosLargos + 1);
-        },
-        'descanso corto': () => {
-            if (contadorDescansosLargos < 2) {
-                setMode(defaultMode);
-                setPomoTemp(pomoTemp);
-                setTiempoResta(pomoTemp * 1000);
-            } else if (contadorDescansosLargos >= 2) {
-                setMode('descanso largo');
-                setPomoTemp(longbreak);
-                setTiempoResta(longbreak * 1000);
-            }
-        },
-        'descanso largo': () => {
-            setMode(defaultMode);
-            setPomoTemp(pomoTemp);
-            setTiempoResta(pomoTemp * 1000);
-            setContadorDescansosLargos(0);
-        }
-    };
-
-    const verificarModoRestartiempo = {
-        'pomodoro': () => {
-            setTiempoResta(pomoTemp * 1000 - tiempoAct);
-        },
-        'descanso corto': () => {
-            setTiempoResta(descansoTemp * 1000 - tiempoAct);
-        },
-        'descanso largo': () => {
-            setTiempoResta(longbreak * 1000 - tiempoAct);
-        }
-    }
 
     // Tareas
     const [tareas, setTareas] = useState([]);
@@ -106,8 +68,21 @@ const pomoTimer = (props) => {
     const [isRunning, setRunning] = useState(false);
     const [tiempoAct, setTiempoAct] = useState(0);
 
+    // Parametros desde la pantalla de configuracion
+    useEffect(() => {
+        if (props.route.params?.pomodoros) {
+            setPomoTemp(props.route.params?.pomodoros);
+        } else if (props.route.params?.descansosCortos) {
+            setDescansoTemp(props.route.params?.tempo.descansosCortos);
+        } else if (props.route.params?.descansosLargos) {
+            setLongBreak(props.route.params?.tempo.descansosLargos);
+        }
+    }, [props.route.params?.pomodoros, props.route.params?.pomodoros, props.route.params?.pomodoros])
+
+
     // Llamada a la BD
     useEffect(() => {
+
         firebase.database.collection('tareas').onSnapshot(querySnapshot => {
 
             const tasks = [];
@@ -175,9 +150,13 @@ const pomoTimer = (props) => {
 
         if (isRunning && tiempoResta > 1) {
 
-            verificarModoRestartiempo[mode] ?
-                verificarModoRestartiempo[mode]() :
-                    console.log('El tiempo no esta decrementado')                
+            if (mode == 'pomodoro') {
+                setTiempoResta(pomoTemp * 1000 - tiempoAct);
+            } else if (mode == 'descanso corto') {
+                setTiempoResta(descansoTemp * 1000 - tiempoAct);
+            } else if (mode == 'descanso largo') {
+                setTiempoResta(longbreak * 1000 - tiempoAct);
+            }
 
             // Se suma el segundo de ejecucion de la funcion setInterval
             tempoID = setInterval(() => {
@@ -191,46 +170,64 @@ const pomoTimer = (props) => {
         // Trivial case
         if (tiempoResta === 0 && contadorDeBloque < bloquesDetiempo) {
             setTiempoAct(0);
+            ring.play();
+            setRingPlaying(true);
 
-            Platform.OS === 'android' || 'ios' ?
-                Alert.alert("Time to rest!") :
-                alert("Time to rest!")
+            if (mode == 'pomodoro') {
+                if (Platform.OS != 'web') {
+                    Alert.alert('Tiempo de trabajar');
+                } else {
+                    alert('Tiempo de trabajar');
+                }
+            } else {
+                if (Platform.OS != 'web') {
+                    Alert.alert('Tiempo de descansar');
+                } else {
+                    alert('Tiempo de descansar');
+                }
+            }
 
             // Si el modo es igual a pomodoro entonces ...
-            verificarModo[mode] ?
-                () => {   
-                    verificarModo[mode]()
+            if (mode == 'pomodoro') {
+                if (contadorDescansosLargos < 2) {
+                    setMode('descanso corto');
+                    setPomoTemp(descansoTemp);
+                    setTiempoResta(descansoTemp * 1000);
                     setContadorDeBloques(contadorDeBloque + 1);
-                } :
-                    alert('Este modo no se encuentra en la base de datos.')
-
-            // switch(mode) {
-            //     case 'pomodoro':
-            //         setMode('descanso corto')
-            //         break
-            // }
-
-            // if (mode == 'pomodoro') {
-            //     setContadorDeBloques(contadorDeBloque + 1);
-            //     contadorDeBloqueReal = contadorDeBloque + 1;
-            //     setTiempoResta(descansoTemp * 1000);
-            //     setMode('descanso corto');
-            //     descansosLargos++;
-            // } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos < 2)) {
-            //     setTiempoResta(pomoTemp * 1000);
-            //     setMode('pomodoro');
-            // } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos >= 2)) {
-            //     setTiempoResta(longbreak * 1000);
-            //     setMode('descanso largo');
-            //     descansosLargos = 0;
-            // } else if (mode == 'descanso corto' && descansosLargos <= bloquesDetiempo) {
-            //     setTiempoResta(pomoTemp * 1000);
-            //     setMode('pomodoro');
-            //     descansosLargos = 0;
-            // } else if (mode == 'descanso largo') {
-            //     setTiempoResta(pomoTemp * 1000);
-            //     setMode('pomodoro');
-            // }
+                    setContadorDescansosLargos(contadorDescansosLargos + 1);
+                    setTheme({
+                        flex: 1,
+                        backgroundColor: '#686de0'
+                    })
+                } else if (contadorDescansosLargos >= 2) {
+                    setMode('descanso largo');
+                    setPomoTemp(longbreak);
+                    setTiempoResta(longbreak * 1000);
+                    setContadorDescansosLargos(0);
+                    setTheme({
+                        flex: 1,
+                        backgroundColor: '#218c74'
+                    })
+                }
+            } else if (mode == 'descanso corto') {
+                setMode(defaultMode);
+                setPomoTemp(pomoTemp);
+                setTiempoResta(pomoTemp * 1000);
+                setContadorDeBloques(contadorDeBloque + 1);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#e74c3c'
+                })
+            } else if (mode == 'descanso largo') {
+                setMode(defaultMode);
+                setPomoTemp(pomoTemp);
+                setTiempoResta(pomoTemp * 1000);
+                setContadorDeBloques(contadorDeBloque + 1);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#e74c3c'
+                });
+            }
 
         } else if (tiempoResta === 0 && contadorDeBloque >= bloquesDetiempo) {
             resetDefaultState();
@@ -325,13 +322,24 @@ const pomoTimer = (props) => {
     }
 
     const resetPomo = () => {
-        setDescansoTemp(5 * 60);
-        setPomoTemp(25 * 60);
-        setTiempoResta(mode == "pomodoro" ? pomoTemp * 1000 : descansoTemp * 1000);
+        setTiempoAct(0);
+        setRunning(false);
+        setPomoTemp(pomoTemp);
+        setContadorDeBloques(0);
+        setContadorDescansosLargos(0);
 
-        if (isRunning || !isRunning) {
-            setRunning(false);
-            setTiempoAct(0);
+        switch (mode) {
+            case 'pomodoro':
+                setTiempoResta(pomoTemp * 1000);
+                break;
+            case 'descanso corto':
+                setTiempoResta(descansoTemp * 1000);
+                break;
+            case 'descanso largo':
+                setTiempoResta(longbreak * 1000);
+                break;
+            default:
+                break;
         }
     }
 
@@ -340,30 +348,39 @@ const pomoTimer = (props) => {
     }
 
     const handleModeChange = () => {
-        setRunning(false);
         setTiempoAct(0);
+        setRunning(false);
+        setPomoTemp(pomoTemp);
+        setContadorDeBloques(0);
+        setContadorDescansosLargos(0);
 
-        if (mode == 'pomodoro') {
-            setMode('descanso corto');
-            setTiempoResta(descansoTemp * 1000);
-            setTheme({
-                flex: 1,
-                backgroundColor: '#686de0'
-            })
-        } else if (mode == 'descanso corto') {
-            setMode('descanso largo');
-            setTiempoResta(longbreak * 1000);
-            setTheme({
-                flex: 1,
-                backgroundColor: '#218c74'
-            })
-        } else {
-            setMode('pomodoro');
-            setTiempoResta(pomoTemp * 1000);
-            setTheme({
-                flex: 1,
-                backgroundColor: '#e74c3c'
-            })
+        switch (mode) {
+            case 'pomodoro':
+                setMode('descanso corto');
+                setTiempoResta(descansoTemp * 1000);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#686de0'
+                });
+                break;
+            case 'descanso corto':
+                setMode('descanso largo');
+                setTiempoResta(longbreak * 1000);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#218c74'
+                });
+                break;
+            case 'descanso largo':
+                setMode('pomodoro');
+                setTiempoResta(pomoTemp * 1000);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#e74c3c'
+                });
+                break;
+            default:
+                break;
         }
     }
 
@@ -393,25 +410,40 @@ const pomoTimer = (props) => {
                                         &nbsp;&nbsp;&nbsp;&nbsp;
                                         <FontAwesome5 name="stopwatch" size={12} color="#fff" />
                                         &nbsp;
-                                        {tareaTemp.done ? bloquesDetiempo : contadorDeBloqueReal}
+                                        {contadorDeBloque}
                                         /
                                         {tareaTemp.pomodoros}
                                     </Text>
                                 </>
                             }
                         </View>
-                        <Button
+                        {/* <Button
                             onPress={skipTime}
                             title='Skip Time'
-                        />
+                        /> */}
 
                         {/* CTA Buttons */}
-                        <View style={styles.pomoCont}>
+                        <View style={[styles.pomoCont, { marginBottom: -50 }]}>
                             <View style={styles.buttonsCont}>
                                 <TimeButton action={handleModeChange} />
                                 <StartButton action={toggleisRunning} tooltip={isRunning ? "Pause" : "Start"} />
                                 <ResetButton action={resetPomo} />
                             </View>
+                        </View>
+
+                        {/* Pantalla de configuracion router */}
+                        <View>
+                            <Text
+                                onPress={() => props.navigation.push('Configuracion', {
+                                    theme: theme,
+                                    pomodoros: pomoTemp / 60,
+                                    descansosCortos: descansoTemp / 60,
+                                    descansosLargos: longbreak / 60
+                                })}
+                                style={{ fontWeight: 'bold', color: 'white', fontSize: 14, textTransform: 'uppercase' }}
+                            >
+                                Configuracion
+                            </Text>
                         </View>
                     </View>
                 </SafeAreaProvider>

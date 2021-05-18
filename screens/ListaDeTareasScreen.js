@@ -12,16 +12,9 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import MenuButtonTasks from '../components/MenuButtonTasks';
 import { ScrollView } from 'react-native-gesture-handler';
 
-// Theme context
-import ThemeContext from '../providers/ThemeContext';
-
 import firebase from '../database/firebase';
 
 const NavButton = (props) => {
-
-    const theme = useContext(ThemeContext);
-
-    console.log(theme);
 
     const [tareas, setTareas] = useState([]);
 
@@ -47,11 +40,9 @@ const NavButton = (props) => {
 
     return (
         <>
-            <StatusBar barStyle={'light-content'} />
             <ScrollView contentContainerStyle={styles.container}>
-                <MenuButtonTasks {...props} mode={"Tareas"} addButton={true} color={theme.backgroundColor} />
-
-                <View style={[styles.content, { backgroundColor: theme.backgroundColor }]}>
+                <MenuButtonTasks {...props} mode={"Tareas"} addButton={true} />
+                <View style={styles.content}>
                     <View style={cardTasks.mainLabel}>
                         <Text style={cardTasks.text}>Planeación</Text>
                     </View>

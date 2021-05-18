@@ -163,8 +163,9 @@ const DetallesDeTarea = (props) => {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.content}>
-                {/* Title Input */}
+                {/* Input Group */}
                 <View style={styles.inputGroup}>
+                    {/* Title Input */}
                     <View style={styles.input}>
                         <TextInput
                             label="Titulo"
@@ -206,7 +207,7 @@ const DetallesDeTarea = (props) => {
                     <View style={styles.estPomodorosInputGroup}>
                         <Text style={styles.estPomodorosText}>
                             <FontAwesome5 name="stopwatch" size={16} color="#707070" /> EST. Pomodoros:
-                            </Text>
+                        </Text>
                         <View style={styles.estPomodorosTextInput}>
                             <TextInput
                                 placeholder='#'

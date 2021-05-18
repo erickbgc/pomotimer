@@ -11,6 +11,8 @@ web-build/
 desktop.ini
 notes.txt
 samples/
+functions/
+notes.js
 
 # macOS
 .DS_Store
