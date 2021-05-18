@@ -170,26 +170,12 @@ const pomoTimer = (props, { navigation }) => {
         // Trivial case
         if (tiempoResta === 0 && contadorDeBloque < bloquesDetiempo) {
             setTiempoAct(0);
-            ring.play();
-            setRingPlaying(true);
-
-            if (mode == 'pomodoro') {
-                if (Platform.OS != 'web') {
-                    Alert.alert('Tiempo de trabajar');
-                } else {
-                    alert('Tiempo de trabajar');
-                }
-            } else {
-                if (Platform.OS != 'web') {
-                    Alert.alert('Tiempo de descansar');
-                } else {
-                    alert('Tiempo de descansar');
-                }
-            }
 
             // Si el modo es igual a pomodoro entonces ...
             if (mode == 'pomodoro') {
                 if (contadorDescansosLargos < 2) {
+                    // Alerta
+                    Platform.OS != 'web' ? Alert.alert('Tiempo de descansar') : alert('Tiempo de descansar');
                     setMode('descanso corto');
                     setPomoTemp(descansoTemp);
                     setTiempoResta(descansoTemp * 1000);
@@ -198,8 +184,10 @@ const pomoTimer = (props, { navigation }) => {
                     setTheme({
                         flex: 1,
                         backgroundColor: '#686de0'
-                    })
+                    });
                 } else if (contadorDescansosLargos >= 2) {
+                    // Alerta
+                    Platform.OS != 'web' ? Alert.alert('Tiempo de descansar') : alert('Tiempo de descansar');
                     setMode('descanso largo');
                     setPomoTemp(longbreak);
                     setTiempoResta(longbreak * 1000);
@@ -210,6 +198,8 @@ const pomoTimer = (props, { navigation }) => {
                     })
                 }
             } else if (mode == 'descanso corto') {
+                // Alerta
+                Platform.OS != 'web' ? Alert.alert('Tiempo de trabajar') : alert('Tiempo de trabajar');
                 setMode(defaultMode);
                 setPomoTemp(pomoTemp);
                 setTiempoResta(pomoTemp * 1000);
@@ -217,8 +207,10 @@ const pomoTimer = (props, { navigation }) => {
                 setTheme({
                     flex: 1,
                     backgroundColor: '#e74c3c'
-                })
+                });
             } else if (mode == 'descanso largo') {
+                // Alerta
+                Platform.OS != 'web' ? Alert.alert('Tiempo de trabajar') : alert('Tiempo de trabajar');
                 setMode(defaultMode);
                 setPomoTemp(pomoTemp);
                 setTiempoResta(pomoTemp * 1000);
