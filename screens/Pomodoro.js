@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Text,
     View,
@@ -20,15 +20,7 @@ import TimeButton from '../components/TimeButton';
 import MenuButton from '../components/MenuButton';
 import Timer from '../components/Timer';
 
-// Theme Context
-import Tema from '../providers/ThemeContext';
-
 import firebase from '../database/firebase';
-import { set } from 'react-native-reanimated';
-
-const Testing = createContext({
-    color: 'blue'
-})
 
 const pomoTimer = (props) => {
 
@@ -37,10 +29,6 @@ const pomoTimer = (props) => {
         flex: 1,
         backgroundColor: '#e74c3c'
     })
-
-    const valTema = useContext(Tema);
-
-    console.log(valTema)
 
     const initialState = {
         id: "",
@@ -51,13 +39,54 @@ const pomoTimer = (props) => {
         createdAt: '',
     }
 
+    const defaultMode = 'pomodoro';
+
+    // Contador para los descansos largos
+    const [contadorDescansosLargos, setContadorDescansosLargos] = useState(0);
+
+    const verificarModo = {
+        'pomodoro': () => {
+            setMode('descanso corto');
+            setPomoTemp(descansoTemp);
+            setTiempoResta(descansoTemp * 1000);
+            setContadorDescansosLargos(contadorDescansosLargos + 1);
+        },
+        'descanso corto': () => {
+            if (contadorDescansosLargos < 2) {
+                setMode(defaultMode);
+                setPomoTemp(pomoTemp);
+                setTiempoResta(pomoTemp * 1000);
+            } else if (contadorDescansosLargos >= 2) {
+                setMode('descanso largo');
+                setPomoTemp(longbreak);
+                setTiempoResta(longbreak * 1000);
+            }
+        },
+        'descanso largo': () => {
+            setMode(defaultMode);
+            setPomoTemp(pomoTemp);
+            setTiempoResta(pomoTemp * 1000);
+            setContadorDescansosLargos(0);
+        }
+    };
+
+    const verificarModoRestartiempo = {
+        'pomodoro': () => {
+            setTiempoResta(pomoTemp * 1000 - tiempoAct);
+        },
+        'descanso corto': () => {
+            setTiempoResta(descansoTemp * 1000 - tiempoAct);
+        },
+        'descanso largo': () => {
+            setTiempoResta(longbreak * 1000 - tiempoAct);
+        }
+    }
+
     // Tareas
     const [tareas, setTareas] = useState([]);
     const [bloquesDetiempo, setBloquesDeTiempo] = useState(1);
     const [tareaActualId, setTareaActualId] = useState('');
     var bloquesTemp = 1;
-    var rondas = 1;
-    var contadorDeBloqueReal = 0;
 
     // Recuperando valores de la tarea actual
     const [tareaTemp, setTareaTemp] = useState(initialState);
@@ -72,7 +101,7 @@ const pomoTimer = (props) => {
     const [pomoTemp, setPomoTemp] = useState(25 * 60);
     const [descansoTemp, setDescansoTemp] = useState(5 * 60);
     const [longbreak, setLongBreak] = useState(15 * 60);
-    const [mode, setMode] = useState('pomodoro');
+    const [mode, setMode] = useState(defaultMode);
     const [tiempoResta, setTiempoResta] = useState();
     const [isRunning, setRunning] = useState(false);
     const [tiempoAct, setTiempoAct] = useState(0);
@@ -143,18 +172,12 @@ const pomoTimer = (props) => {
     // Temporizador
     useEffect(() => {
         let tempoID = null;
-        let descansosLargos = 0;
-        console.log(`Outside the Pomodoro conditional\nThis is the number of rounds completed: ${contadorDeBloque}`);
 
         if (isRunning && tiempoResta > 1) {
 
-            if (mode == 'pomodoro') {
-                setTiempoResta(pomoTemp * 1000 - tiempoAct);
-            } else if (mode == 'descanso corto') {
-                setTiempoResta(descansoTemp * 1000 - tiempoAct);
-            } else if (mode == 'descanso largo') {
-                setTiempoResta(longbreak * 1000 - tiempoAct);
-            }
+            verificarModoRestartiempo[mode] ?
+                verificarModoRestartiempo[mode]() :
+                    console.log('El tiempo no esta decrementado')                
 
             // Se suma el segundo de ejecucion de la funcion setInterval
             tempoID = setInterval(() => {
@@ -168,38 +191,49 @@ const pomoTimer = (props) => {
         // Trivial case
         if (tiempoResta === 0 && contadorDeBloque < bloquesDetiempo) {
             setTiempoAct(0);
-            if (Platform.OS === 'android') {
-                Alert.alert("Time to rest!");
-            } else if (Platform.OS === 'web') {
-                alert("Time to rest!");
-            }
 
-            if (mode == 'pomodoro') {
-                setContadorDeBloques(contadorDeBloque + 1);
-                contadorDeBloqueReal = contadorDeBloque + 1;
-                setTiempoResta(descansoTemp * 1000);
-                setMode('descanso corto');
-                descansosLargos++;
-            } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos < 2)) {
-                setTiempoResta(pomoTemp * 1000);
-                setMode('pomodoro');
-            } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos >= 2)) {
-                setTiempoResta(longbreak * 1000);
-                setMode('descanso largo');
-                descansosLargos = 0;
-            } else if (mode == 'descanso corto' && descansosLargos <= bloquesDetiempo) {
-                setTiempoResta(pomoTemp * 1000);
-                setMode('pomodoro');
-                descansosLargos = 0;
-            } else if (mode == 'descanso largo') {
-                setTiempoResta(pomoTemp * 1000);
-                setMode('pomodoro');
-            }
+            Platform.OS === 'android' || 'ios' ?
+                Alert.alert("Time to rest!") :
+                alert("Time to rest!")
+
+            // Si el modo es igual a pomodoro entonces ...
+            verificarModo[mode] ?
+                () => {   
+                    verificarModo[mode]()
+                    setContadorDeBloques(contadorDeBloque + 1);
+                } :
+                    alert('Este modo no se encuentra en la base de datos.')
+
+            // switch(mode) {
+            //     case 'pomodoro':
+            //         setMode('descanso corto')
+            //         break
+            // }
+
+            // if (mode == 'pomodoro') {
+            //     setContadorDeBloques(contadorDeBloque + 1);
+            //     contadorDeBloqueReal = contadorDeBloque + 1;
+            //     setTiempoResta(descansoTemp * 1000);
+            //     setMode('descanso corto');
+            //     descansosLargos++;
+            // } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos < 2)) {
+            //     setTiempoResta(pomoTemp * 1000);
+            //     setMode('pomodoro');
+            // } else if (mode == 'descanso corto' && (descansosLargos > bloquesDetiempo && descansosLargos >= 2)) {
+            //     setTiempoResta(longbreak * 1000);
+            //     setMode('descanso largo');
+            //     descansosLargos = 0;
+            // } else if (mode == 'descanso corto' && descansosLargos <= bloquesDetiempo) {
+            //     setTiempoResta(pomoTemp * 1000);
+            //     setMode('pomodoro');
+            //     descansosLargos = 0;
+            // } else if (mode == 'descanso largo') {
+            //     setTiempoResta(pomoTemp * 1000);
+            //     setMode('pomodoro');
+            // }
 
         } else if (tiempoResta === 0 && contadorDeBloque >= bloquesDetiempo) {
-            descansosLargos = 0;
-            setTiempoResta(pomoTemp * 1000);
-            setMode('pomodoro');
+            resetDefaultState();
             checkDoneTarea();
             setTareaTemp(initialState);
             console.log("La tarea a terminado");
@@ -278,6 +312,16 @@ const pomoTimer = (props) => {
         });
         setTareaTemp({ ...tareaTemp, done: true });
         console.log('done');
+    }
+
+    const resetDefaultState = () => {
+        setRunning(false);
+        setTiempoAct(0);
+        setMode('pomodoro')
+        setPomoTemp(pomoTemp);
+        setTiempoResta(pomoTemp * 1000);
+        setContadorDescansosLargos(0);
+        setContadorDeBloques(0);
     }
 
     const resetPomo = () => {
