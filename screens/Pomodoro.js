@@ -22,7 +22,7 @@ import Timer from '../components/Timer';
 
 import firebase from '../database/firebase';
 
-const pomoTimer = (props, { navigation }) => {
+const pomoTimer = (props) => {
 
     // Styles
     const [theme, setTheme] = useState({
@@ -70,15 +70,12 @@ const pomoTimer = (props, { navigation }) => {
 
     // Parametros desde la pantalla de configuracion
     useEffect(() => {
-        if (props.route.params?.pomodoros) {
+        if (props.route.params?.cambios) {
             setPomoTemp(props.route.params?.pomodoros);
-        } else if (props.route.params?.descansosCortos) {
-            setDescansoTemp(props.route.params?.tempo.descansosCortos);
-        } else if (props.route.params?.descansosLargos) {
-            setLongBreak(props.route.params?.tempo.descansosLargos);
+            setDescansoTemp(props.route.params?.descansosCortos);
+            setLongBreak(props.route.params?.descansosLargos);
         }
-    }, [props.route.params?.pomodoros, props.route.params?.pomodoros, props.route.params?.pomodoros])
-
+    }, [props.route.params?.cambios])
 
     // Llamada a la BD
     useEffect(() => {
@@ -428,6 +425,7 @@ const pomoTimer = (props, { navigation }) => {
                             <Text
                                 onPress={() => props.navigation.push('Configuracion', {
                                     theme: theme,
+                                    cambios: false,
                                     pomodoros: pomoTemp / 60,
                                     descansosCortos: descansoTemp / 60,
                                     descansosLargos: longbreak / 60

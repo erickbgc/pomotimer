@@ -16,12 +16,13 @@ import {
 
 const ConfigScreen = ({ route, navigation }) => {
 
-    const { theme, pomodoros, descansosCortos, descansosLargos } = route.params;
+    const { theme, pomodoros, descansosCortos, descansosLargos, cambios } = route.params;
 
     const initialState = {
         pomodoros: '',
         descansosCortos: '',
         descansosLargos: '',
+        cambios: false
     }
 
     const [state, setState] = useState(initialState);
@@ -35,9 +36,10 @@ const ConfigScreen = ({ route, navigation }) => {
 
     const getConfig = () => {
         setState({
-            pomodoros: pomodoros,
-            descansosCortos: descansosCortos,
-            descansosLargos: descansosLargos
+            pomodoros,
+            descansosCortos,
+            descansosLargos,
+            cambios
         });
         setLoader(false)
     }
@@ -51,10 +53,11 @@ const ConfigScreen = ({ route, navigation }) => {
             navigation.navigate('Pomodoro', {
                 pomodoros: state.pomodoros * 60,
                 descansosCortos: state.descansosCortos * 60,
-                descansosLargos: state.descansosLargos * 60
+                descansosLargos: state.descansosLargos * 60,
+                cambios: true
             });
         } else {
-            alert('Comprueba los campos ingresados')
+            alert('Comprueba los campos ingresados');
         }
     }
 
