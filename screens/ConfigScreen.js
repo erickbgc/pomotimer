@@ -86,8 +86,8 @@ const ConfigScreen = ({ route, navigation }) => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <View style={styles.content}>
+        <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+            <View style={[styles.content, { backgroundColor: theme.backgroundColor }]}>
                 {/* Input Group */}
                 <View style={styles.inputGroup}>
                     {/* Pomodoros */}
