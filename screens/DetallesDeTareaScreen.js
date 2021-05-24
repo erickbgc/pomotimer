@@ -25,20 +25,27 @@ const DetallesDeTarea = (props) => {
         title: '',
         description: '',
         pomodoros: 1,
+        active: false,
         done: false,
         createdAt: new Date()
     }
 
-    // Loader
+    // Loader Component to prevent that the screen is being displayed without retriving the values from the DB
     const [loading, setLoading] = useState(true);
 
     // Task retrieved from the ListTask Screen
-    const { task } = props.route.params;
+    const { task, activas } = props.route.params;
+
+    // console.log(activas);
 
     // State to update the task
     const [state, setState] = useState(initialState);
 
     // ******* Handlers Validators for Inputs ********
+
+    const validateActiveTasks = () => {
+        return activas > 0 ? true : false;
+    }
 
     const hasErrors = (campo) => {
         return campo.length < 1;
@@ -57,8 +64,12 @@ const DetallesDeTarea = (props) => {
         }
     }
 
-    const handleCheckbox = (name) => {
+    const handleCheckboxDone = (name) => {
         setState({ ...state, [name]: !state.done });
+    }
+
+    const handleCheckboxActive = (name) => {
+        setState({ ...state, [name]: !state.active });
     }
 
     // ******* END - Handlers Validators for Inputs ********
@@ -119,21 +130,68 @@ const DetallesDeTarea = (props) => {
         setLoading(false);
     }
 
+    // console.log(state.active);
+
     // Actualizar Tarea
     const updateTask = async () => {
         if (hasErrors && estPomoHasErrors) {
-            const taskRef = firebase.database.collection('tareas').doc(state.id);
-            setLoading(true);
-            await taskRef.set({
-                title: state.title,
-                description: state.description,
-                pomodoros: state.pomodoros,
-                done: state.done,
-                modifiedAt: new Date()
-            }, { merge: true });
-            setState(initialState);
-            setLoading(false);
-            props.navigation.navigate('Lista de Tareas');
+
+            if (state.active) {
+                if (activas > 0 && task.active) {
+
+                    if (!state.done) {
+                        const taskRef = firebase.database.collection('tareas').doc(state.id);
+                        setLoading(true);
+                        await taskRef.set({
+                            title: state.title,
+                            description: state.description,
+                            pomodoros: state.pomodoros,
+                            active: state.active,
+                            done: state.done,
+                            modifiedAt: new Date()
+                        }, { merge: true });
+                        setState(initialState);
+                        setLoading(false);
+                        props.navigation.navigate('Lista de Tareas');
+                    } else if (state.done) {
+                        alert('La tarea no puede estar activa si esta marcada como realizada.');
+                    }
+
+                } else if (activas <= 0) {
+
+                    const taskRef = firebase.database.collection('tareas').doc(state.id);
+                    setLoading(true);
+                    await taskRef.set({
+                        title: state.title,
+                        description: state.description,
+                        pomodoros: state.pomodoros,
+                        active: state.active,
+                        done: state.done,
+                        modifiedAt: new Date()
+                    }, { merge: true });
+                    setState(initialState);
+                    setLoading(false);
+                    props.navigation.navigate('Lista de Tareas');
+
+                } else if (activas > 0) {
+                    alert('Solo puede existir una tarea activa.');
+                }
+            } else if (state.active == false) {
+                const taskRef = firebase.database.collection('tareas').doc(state.id);
+                setLoading(true);
+                await taskRef.set({
+                    title: state.title,
+                    description: state.description,
+                    pomodoros: state.pomodoros,
+                    active: state.active,
+                    done: state.done,
+                    modifiedAt: new Date()
+                }, { merge: true });
+                setState(initialState);
+                setLoading(false);
+                props.navigation.navigate('Lista de Tareas');
+            }
+
         } else {
             alert('Verifica los campos que desea actualizar.');
         }
@@ -226,6 +284,16 @@ const DetallesDeTarea = (props) => {
                             </HelperText>
                         </View>
                     </View>
+                    {/* Active Field */}
+                    <View style={{ marginTop: 25 }}>
+                        <Checkbox.Item
+                            label="Tarea actual"
+                            labelStyle={{ fontWeight: 'bold' }}
+                            status={state.active ? 'checked' : 'unchecked'}
+                            color="blue"
+                            onPress={() => handleCheckboxActive('active')}
+                        />
+                    </View>
                     {/* Done Field */}
                     <View style={{ marginTop: 25 }}>
                         <Checkbox.Item
@@ -233,7 +301,7 @@ const DetallesDeTarea = (props) => {
                             labelStyle={{ fontWeight: 'bold' }}
                             status={state.done ? 'checked' : 'unchecked'}
                             color="blue"
-                            onPress={() => handleCheckbox('done')}
+                            onPress={() => handleCheckboxDone('done')}
                         />
                     </View>
                     {/* Update Button */}
@@ -265,7 +333,8 @@ const DetallesDeTarea = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#e74c3c'
+        backgroundColor: '#e74c3c',
+        paddingVertical: 10,
     },
     content: {
         flex: 1,

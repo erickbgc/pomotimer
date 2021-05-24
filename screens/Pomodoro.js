@@ -4,9 +4,6 @@ import {
     View,
     StyleSheet,
     StatusBar,
-    Alert,
-    Button,
-    Platform,
     ActivityIndicator
 } from 'react-native';
 
@@ -37,6 +34,7 @@ const pomoTimer = (props) => {
         pomodoros: 1,
         done: false,
         createdAt: '',
+        modifiedAt: '',
     }
 
     const defaultMode = 'pomodoro';
@@ -51,13 +49,11 @@ const pomoTimer = (props) => {
     const [contadorDescansosLargos, setContadorDescansosLargos] = useState(0);
 
     // Tareas
-    const [tareas, setTareas] = useState([]);
-    const [bloquesDetiempo, setBloquesDeTiempo] = useState(1);
-    const [tareaActualId, setTareaActualId] = useState('');
-    var bloquesTemp = 1;
+    const [tareas, setTareas] = useState(initialState);
+    const [bloquesDetiempo, setBloquesDeTiempo] = useState(999);
 
     // Recuperando valores de la tarea actual
-    const [tareaTemp, setTareaTemp] = useState(initialState);
+    // const [tareaTemp, setTareaTemp] = useState(initialState);
 
     // Loader
     const [loading, setLoading] = useState(true);
@@ -83,18 +79,26 @@ const pomoTimer = (props) => {
     useEffect(() => {
         if (props.route.params?.cambios) {
             // *** Saving state in customs Tempos ***
-            setCustomPomo(props.route.params?.pomodoros);
+            setCustomPomo(props.route.params?.customPomo);
             setCustomDesCorto(props.route.params?.descansosCortos);
             setCustomDesLargo(props.route.params?.descansosLargos);
             // *** END - Saving state in customs Tempos ***
 
             // *** Updating state on current tempos ***
-            setPomoTemp(props.route.params?.pomodoros);
+            setPomoTemp(props.route.params?.customPomo);
             setDescansoTemp(props.route.params?.descansosCortos);
             setLongBreak(props.route.params?.descansosLargos);
             // *** END - Updating state on current tempos ***
+            // setContadorDeBloques(0);
+            // setContadorDescansosLargos(0);
+            // setTiempoAct(0);
         }
-    }, [props.route.params?.cambios]
+    }, [
+        props.route.params?.cambios,
+        props.route.params?.customPomo,
+        props.route.params?.descansosCortos,
+        props.route.params?.descansosLargos
+    ]
     )
 
     // Llamada a la BD
@@ -103,39 +107,38 @@ const pomoTimer = (props) => {
         firebase.database.collection('tareas').onSnapshot(querySnapshot => {
 
             const tasks = [];
-            const lastTask = [];
-            let lastTaskId = '';
-            let bloques = 0;
+            let bloques = 1;
 
             querySnapshot.docs.forEach(doc => {
-                const { title, description, pomodoros, createdAt, done } = doc.data();
-                tasks.push({
-                    id: doc.id,
-                    title,
-                    description,
-                    pomodoros,
-                    createdAt,
-                    done
-                });
+                const { title, description, pomodoros, createdAt, done, active, modifiedAt } = doc.data();
+
+                if (active) {
+
+                    tasks.push({
+                        id: doc.id,
+                        title,
+                        description,
+                        pomodoros,
+                        createdAt,
+                        modifiedAt: modifiedAt || '',
+                        active,
+                        done
+                    })
+
+                    bloques = pomodoros;
+                }
+
             });
 
             try {
                 if (tasks.length > 0) {
-                    setTareas(tasks);
-
-                    lastTask.push(tasks[tasks.length - 1]);
-
-                    lastTask.forEach((val) => {
-                        bloques = val.pomodoros;
-                        lastTaskId = val.id;
-                    })
-
-                    setTareaActualId(lastTaskId);
+                    setTareas(tasks[0]);
                     setBloquesDeTiempo(bloques);
-                    bloquesTemp = bloquesDetiempo;
-                    rondas = bloquesTemp * 2;
                     setLoading(false);
-                    // setTareaActual([tasks[tasks.length - 1]]);
+                } else {
+                    setTareas(initialState);
+                    setBloquesDeTiempo(999);
+                    setLoading(false);
                 }
             } catch (error) {
                 console.log(error.message);
@@ -143,11 +146,7 @@ const pomoTimer = (props) => {
         });
     }, []);
 
-    useEffect(() => {
-        if (tareaActualId !== '') {
-            getTaskById(tareaActualId);
-        }
-    }, [tareaActualId]);
+    // console.log(bloquesDetiempo);
 
     // Actualizacion de Tiempo Restante
     useEffect(() => {
@@ -185,137 +184,113 @@ const pomoTimer = (props) => {
         }
 
         // Trivial case
-        if (tiempoResta === 0 && contadorDeBloque < bloquesDetiempo) {
+        if (tiempoResta === 0 && bloquesDetiempo <= 1) {
             setTiempoAct(0);
-            // Si el modo es igual a pomodoro entonces ...
             if (mode == 'pomodoro') {
-                if (contadorDescansosLargos < 2) {
-                    // Alerta
-                    // Platform.OS != 'web' ? Alert.alert('Tiempo de descansar') : alert('Tiempo de descansar');
-                    setMode('descanso corto');
-                    setPomoTemp(descansoTemp);
-                    console.log("Dentro del tiempo descanso corto: ", pomoTemp);
-                    setTiempoResta(descansoTemp * 1000);
+
+                if (tareas.title != '' && !tareas.done) {
+                    checkDoneTarea();
+                    console.log("La tarea ha terminado");
+                    resetDefaultState();
+                    clearInterval(tempoID);
+                } else {
+                    resetDefaultState();
+                    clearInterval(tempoID);
+                }
+
+                setMode('descanso corto');
+                setPomoTemp(descansoTemp);
+                setTiempoResta(descansoTemp * 1000);
+                setTheme({
+                    flex: 1,
+                    backgroundColor: '#e74c3c'
+                });
+            }
+        } else if (tiempoResta === 0 && bloquesDetiempo > 1) {
+
+            if (contadorDeBloque < bloquesDetiempo) {
+                setTiempoAct(0);
+                // Si el modo es igual a pomodoro entonces ...
+                if (mode == 'pomodoro') {
+                    // Contador
                     setContadorDeBloques(contadorDeBloque + 1);
-                    setContadorDescansosLargos(contadorDescansosLargos + 1);
+                    // POMODOROS
+                    if (contadorDescansosLargos < 2) {
+                        setMode('descanso corto');
+                        setPomoTemp(descansoTemp);
+                        setTiempoResta(descansoTemp * 1000);
+                        setContadorDescansosLargos(contadorDescansosLargos + 1);
+                        setTheme({
+                            flex: 1,
+                            backgroundColor: '#686de0'
+                        });
+                        setRunning(false);
+                        clearInterval(tempoID);
+                    } else if (contadorDescansosLargos >= 2) {
+                        setMode('descanso largo');
+                        setPomoTemp(longbreak);
+                        setTiempoResta(longbreak * 1000);
+                        setTheme({
+                            flex: 1,
+                            backgroundColor: '#218c74'
+                        });
+                        setRunning(false);
+                        clearInterval(tempoID);
+                    }
+                    // END - POMODOROS
+                } else if (mode == 'descanso corto') {
+                    setMode(defaultMode);
+                    setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
+                    setTiempoResta(pomoTemp * 1000);
                     setTheme({
                         flex: 1,
-                        backgroundColor: '#686de0'
+                        backgroundColor: '#e74c3c'
                     });
                     setRunning(false);
                     clearInterval(tempoID);
-                } else if (contadorDescansosLargos >= 2) {
+                } else if (mode == 'descanso largo') {
                     // Alerta
-                    // Platform.OS != 'web' ? Alert.alert('Tiempo de descansar') : alert('Tiempo de descansar');
-                    setMode('descanso largo');
-                    setPomoTemp(longbreak);
-                    setTiempoResta(longbreak * 1000);
-                    setContadorDescansosLargos(0);
+                    // Platform.OS != 'web' ? Alert.alert('Tiempo de trabajar') : alert('Tiempo de trabajar');
+                    setMode(defaultMode);
+                    setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
+                    setTiempoResta(pomoTemp * 1000);
                     setTheme({
                         flex: 1,
-                        backgroundColor: '#218c74'
+                        backgroundColor: '#e74c3c'
                     });
                     setRunning(false);
                     clearInterval(tempoID);
                 }
-            } else if (mode == 'descanso corto') {
-                // Alerta
-                // Platform.OS != 'web' ? Alert.alert('Tiempo de trabajar') : alert('Tiempo de trabajar');
-                setMode(defaultMode);
-                console.log("Dentro del tiempo pomodoro: ", pomoTemp);
-                setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
-                setTiempoResta(pomoTemp * 1000);
-                setContadorDeBloques(contadorDeBloque + 1);
-                setTheme({
-                    flex: 1,
-                    backgroundColor: '#e74c3c'
-                });
-                setRunning(false);
-                clearInterval(tempoID);
-            } else if (mode == 'descanso largo') {
-                // Alerta
-                // Platform.OS != 'web' ? Alert.alert('Tiempo de trabajar') : alert('Tiempo de trabajar');
-                setMode(defaultMode);
-                setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
-                setTiempoResta(pomoTemp * 1000);
-                setContadorDeBloques(contadorDeBloque + 1);
-                setTheme({
-                    flex: 1,
-                    backgroundColor: '#e74c3c'
-                });
-                setRunning(false);
-                clearInterval(tempoID);
+            } else if (tiempoResta == 0 && contadorDeBloque >= bloquesDetiempo) {
+                if (tareas.title != '' && !tareas.done) {
+                    checkDoneTarea();
+                    console.log("La tarea ha terminado");
+                    resetDefaultState();
+                    clearInterval(tempoID);
+                } else {
+                    resetDefaultState();
+                    clearInterval(tempoID);
+                }
             }
 
-        } else if (tiempoResta === 0 && contadorDeBloque >= bloquesDetiempo) {
-            resetDefaultState();
-            if (!tareaTemp.done) {
-                checkDoneTarea();
-            }
-            // Hay que comprobar si la tarea a terminado, para que el temporizador
-            // no se detenga si es que no tenemos tareas
-            setTareaTemp(initialState);
-            console.log("La tarea a terminado");
-            clearInterval(tempoID);
         }
 
         return () => clearInterval(tempoID);
     }, [isRunning, tiempoAct]);
 
-    console.log("Pomodoro: ", pomoTemp);
-
-    // Only Works when time is running
-    const skipTime = () => {
-        let descansosLargos = 0
-        if (isRunning) {
-            if (contadorDeBloque < bloquesDetiempo) {
-                setRunning(false);
-                setTiempoAct(0);
-                setDescansoTemp(5 * 60);
-                setPomoTemp(25 * 60);
-                setLongBreak(15 * 60)
-
-                if (mode == 'pomodoro') {
-                    setMode('descanso corto');
-                    setPomoTemp(descansoTemp);
-                    setTiempoResta(descansoTemp * 1000);
-                    descansosLargos++;
-                } else if (mode == 'descanso corto' && descansosLargos > bloquesDetiempo) {
-                    setMode('pomodoro');
-                    setPomoTemp(pomoTemp);
-                    setTiempoResta(pomoTemp * 1000);
-                } else if (mode == 'descanso corto' && descansosLargos > 2) {
-                    setMode('descanso largo');
-                    setPomoTemp(longbreak);
-                    setTiempoResta(longbreak * 1000)
-                    descansosLargos = 0;
-                } else if (mode == 'descanso largo') {
-                    setMode('pomodoro');
-                    setPomoTemp(pomoTemp);
-                    setTiempoResta(pomoTemp * 1000);
-                }
-
-                setContadorDeBloques(contadorDeBloque + 1);
-            } else if (contadorDeBloque >= rondas) {
-                handleModeChange();
-                checkDoneTarea();
-                console.log("La tarea a terminado");
-            }
-        } else {
-            alert('Time is not running!');
-        }
-    }
+    console.log(tareas.title);
+    console.log(contadorDeBloque);
 
     // Consulta a la DB sobre el ID que de la tarea actual
-    const getTaskById = async id => {
-        const dbRef = firebase.database.collection('tareas').doc(id);
-        const doc = await dbRef.get();
-        const task = doc.data();
-        setTareaTemp({
-            ...task,
-            id: doc.id,
-        });
-    }
+    // const getTaskById = async id => {
+    //     const dbRef = firebase.database.collection('tareas').doc(id);
+    //     const doc = await dbRef.get();
+    //     const task = doc.data();
+    //     setTareaTemp({
+    //         ...task,
+    //         id: doc.id,
+    //     });
+    // }
 
     // Loader, se ejecuta cuando los datos de la BD estan siendo procesados
     if (loading) {
@@ -327,44 +302,48 @@ const pomoTimer = (props) => {
     }
 
     const checkDoneTarea = async () => {
-        const dbRef = firebase.database.collection('tareas').doc(tareaTemp.id);
+        const dbRef = firebase.database.collection('tareas').doc(tareas.id);
         await dbRef.update({
-            done: true
+            done: true,
+            active: false,
+            modifiedAt: new Date()
         });
-        // if(tareas.length > 0) {
-        //     setTareaTemp(tareas[tareas.length] - 1);
-        // } else {
-        //     setTareaTemp({ ...tareaTemp, done: true });
-        // }
-        setTareaTemp({ ...tareaTemp, done: true });
-        console.log('done');
     }
 
     const resetDefaultState = () => {
         setRunning(false);
         setTiempoAct(0);
-        setMode('pomodoro')
+        setMode('pomodoro');
         setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
         setTiempoResta(pomoTemp * 1000);
         setContadorDescansosLargos(0);
         setContadorDeBloques(0);
+        setBloquesDeTiempo(999);
+        setTheme({
+            flex: 1,
+            backgroundColor: '#e74c3c'
+        });
     }
 
     const resetPomo = () => {
         setTiempoAct(0);
         setRunning(false);
-        setPomoTemp(pomoTemp);
         setContadorDeBloques(0);
         setContadorDescansosLargos(0);
 
+        console.log(mode)
+
         switch (mode) {
             case 'pomodoro':
+                setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
                 setTiempoResta(pomoTemp * 1000);
                 break;
             case 'descanso corto':
+                setPomoTemp(customDesCorto == '' || customDesCorto == undefined ? defaultTempos.descansosCortos : customPomo);
                 setTiempoResta(descansoTemp * 1000);
                 break;
             case 'descanso largo':
+                setPomoTemp(customDesLargo == '' || customDesLargo == undefined ? defaultTempos.descansosLargos : customDesLargo);
                 setTiempoResta(longbreak * 1000);
                 break;
             default:
@@ -379,13 +358,13 @@ const pomoTimer = (props) => {
     const handleModeChange = () => {
         setTiempoAct(0);
         setRunning(false);
-        setPomoTemp(pomoTemp);
         setContadorDeBloques(0);
         setContadorDescansosLargos(0);
 
         switch (mode) {
             case 'pomodoro':
                 setMode('descanso corto');
+                setPomoTemp(customDesCorto == '' || customDesCorto == undefined ? defaultTempos.descansosCortos : customPomo);
                 setTiempoResta(descansoTemp * 1000);
                 setTheme({
                     flex: 1,
@@ -394,6 +373,7 @@ const pomoTimer = (props) => {
                 break;
             case 'descanso corto':
                 setMode('descanso largo');
+                setPomoTemp(customDesLargo == '' || customDesLargo == undefined ? defaultTempos.descansosLargos : customDesLargo);
                 setTiempoResta(longbreak * 1000);
                 setTheme({
                     flex: 1,
@@ -402,6 +382,7 @@ const pomoTimer = (props) => {
                 break;
             case 'descanso largo':
                 setMode('pomodoro');
+                setPomoTemp(customPomo == '' || customPomo == undefined ? defaultTempos.pomodoros : customPomo);
                 setTiempoResta(pomoTemp * 1000);
                 setTheme({
                     flex: 1,
@@ -428,20 +409,21 @@ const pomoTimer = (props) => {
                         {/* temporizador y tarea actual */}
                         <View style={{ marginBottom: -150 }}>
                             <Timer time={tiempoResta} mode={mode} />
+
                             {
-                                !tareaTemp.done &&
+                                !tareas.done && tareas.title != '' &&
                                 <>
                                     <Text
-                                        key={tareaTemp.id}
+                                        key={tareas.id}
                                         style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: '#fff', marginTop: 10, marginBottom: 40 }}
                                     >
-                                        {tareaTemp.title}
+                                        {tareas.title}
                                         &nbsp;&nbsp;&nbsp;&nbsp;
                                         <FontAwesome5 name="stopwatch" size={12} color="#fff" />
                                         &nbsp;
                                         {contadorDeBloque}
                                         /
-                                        {tareaTemp.pomodoros}
+                                        {tareas.pomodoros}
                                     </Text>
                                 </>
                             }
@@ -462,14 +444,14 @@ const pomoTimer = (props) => {
 
                         {/* Pantalla de configuracion router */}
                         <View>
-                            <View style={{padding: 15, backgroundColor: 'rgba(75, 75, 75,0.7)', borderRadius: 5}}>
+                            <View style={{ padding: 15, backgroundColor: 'rgba(75, 75, 75,0.7)', borderRadius: 5 }}>
                                 <Text
                                     onPress={() => props.navigation.push('Configuracion', {
                                         theme: theme,
-                                        cambios: false,
-                                        pomodoros: pomoTemp / 60,
+                                        customPomo: customPomo / 60 || defaultTempos.pomodoros / 60,
                                         descansosCortos: descansoTemp / 60,
-                                        descansosLargos: longbreak / 60
+                                        descansosLargos: longbreak / 60,
+                                        cambios: false,
                                     })}
                                     style={{ fontWeight: 'bold', color: 'white', fontSize: 14, textTransform: 'uppercase' }}
                                 >

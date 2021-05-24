@@ -7,7 +7,7 @@ const MenuButton = (props) => {
 
     const navigation = useNavigation();
 
-    const { mode, addButton, backButton, color } = props;
+    const { mode, addButton, backButton } = props;
 
     return (
         <View style={backButton ? [styles.toolbar, { justifyContent: 'flex-start' }] : [styles.toolbar]} {...props} >

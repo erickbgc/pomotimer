@@ -16,10 +16,10 @@ import {
 
 const ConfigScreen = ({ route, navigation }) => {
 
-    const { theme, pomodoros, descansosCortos, descansosLargos, cambios } = route.params;
+    const { theme, descansosCortos, descansosLargos, customPomo, cambios } = route.params;
 
     const initialState = {
-        pomodoros: '',
+        customPomo: '',
         descansosCortos: '',
         descansosLargos: '',
         cambios: false
@@ -36,10 +36,10 @@ const ConfigScreen = ({ route, navigation }) => {
 
     const getConfig = () => {
         setState({
-            pomodoros,
+            customPomo: customPomo,
             descansosCortos,
             descansosLargos,
-            cambios
+            cambios,
         });
         setLoader(false)
     }
@@ -49,9 +49,9 @@ const ConfigScreen = ({ route, navigation }) => {
             setState({
                 ...state
             });
-            console.log(state)
+            // console.log(state)
             navigation.navigate('Pomodoro', {
-                pomodoros: state.pomodoros * 60,
+                customPomo: state.customPomo * 60,
                 descansosCortos: state.descansosCortos * 60,
                 descansosLargos: state.descansosLargos * 60,
                 cambios: true
@@ -104,11 +104,11 @@ const ConfigScreen = ({ route, navigation }) => {
                                 numberOfLines={1}
                                 maxLength={3}
                                 style={{ width: 100 }}
-                                onChangeText={(value) => handleNumericInput('pomodoros', value)}
-                                value={(state.pomodoros).toString()}
+                                onChangeText={(value) => handleNumericInput('customPomo', value)}
+                                value={(state.customPomo).toString()}
                             />
                             <HelperText
-                                visible={estPomoHasErrors(state.pomodoros)}
+                                visible={estPomoHasErrors(state.customPomo)}
                                 type='error'
                             >
                                 Este campo debe ser mayor a 0.
